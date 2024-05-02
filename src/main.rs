@@ -1,3 +1,8 @@
+use args::SoCalArgs;
+use clap::Parser;
+
+mod args;
+
 fn main() {
-    println!("Hello, world!");
+    let args = SoCalArgs::parse();
 }
