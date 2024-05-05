@@ -69,8 +69,9 @@ pub fn handle_new_account(application: &Application) {
     for stream in listener.incoming() {
         let stream = stream.unwrap();
 
-        let result = handle_connection(stream, &address, &client, &application);
-        println!("Result: {:?}", result);
+        // TODO: handle errors and exit
+        let _ = handle_connection(stream, &address, &client, &application);
+        return;
     }
 }
 
@@ -145,21 +146,6 @@ fn handle_connection(
 
 fn store_account(account: Account, application: &Application) -> Result<(), NewAccountError> {
     let db = Connection::open(&application.db_path).unwrap();
-
-    db.execute(
-        "CREATE TABLE IF NOT EXISTS accounts(
-                id integer PRIMARY KEY,
-                email text NOT NULL UNIQUE,
-                access_token text NOT NULL,
-                refresh_token text NOT NULL,
-                expires_at text NOT NULL
-            )",
-        [],
-    )
-    .map_err(|e| {
-        println!("Error creating accounts table: {:?}", e);
-        NewAccountError::SqliteError
-    })?;
 
     db.execute(
         "INSERT INTO accounts (email, access_token, refresh_token, expires_at) VALUES (?1, ?2, ?3, ?4)",

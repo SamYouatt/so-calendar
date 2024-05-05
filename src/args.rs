@@ -22,4 +22,6 @@ pub struct AccountCommand {
 pub enum AccountSubcommand {
     /// Link a new calendar account
     New,
+    /// List the currently connected accounts
+    List,
 }
