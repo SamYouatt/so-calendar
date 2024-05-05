@@ -9,7 +9,6 @@ use oauth2::{
     basic::BasicClient, reqwest::http_client, AuthorizationCode, CsrfToken, PkceCodeChallenge,
     PkceCodeVerifier, Scope, TokenResponse,
 };
-use rusqlite::Connection;
 use serde::Deserialize;
 use url::Url;
 
@@ -135,9 +134,7 @@ fn handle_tcp_request(
 }
 
 fn store_account(account: Account, application: &Application) -> Result<(), NewAccountError> {
-    let db = Connection::open(&application.db_path).unwrap();
-
-    db.execute(
+    application.db.execute(
         "INSERT INTO accounts (email, access_token, refresh_token, expires_at) VALUES (?1, ?2, ?3, ?4)",
         [account.email, account.access_token, account.refresh_token, account.expiry.to_rfc3339()],
         )

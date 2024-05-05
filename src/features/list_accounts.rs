@@ -1,7 +1,5 @@
 use std::fmt::Display;
 
-use rusqlite::Connection;
-
 use crate::Application;
 
 #[derive(Debug)]
@@ -20,9 +18,8 @@ impl Display for Account {
 }
 
 pub fn handle_list_accounts(application: &Application) {
-    let db = Connection::open(&application.db_path).unwrap();
-
-    let mut statement = db
+    let mut statement = application
+        .db
         .prepare("SELECT email FROM accounts")
         .expect("Malformed account select query");
 
