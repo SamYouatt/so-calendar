@@ -16,10 +16,7 @@ pub struct Application {
 }
 
 impl Application {
-    pub fn setup() -> Result<Self, ConfigurationError> {
-        let data_dir = dirs_next::data_dir()
-            .expect("Unable to find data directory")
-            .join("so-calendar");
+    pub fn setup(data_dir: PathBuf) -> Result<Self, ConfigurationError> {
         fs::create_dir_all(&data_dir).expect("Failed to create data directory");
 
         let db_path = data_dir.join("app.sqlite");
