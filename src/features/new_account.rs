@@ -4,13 +4,24 @@ use std::{
     net::{TcpListener, TcpStream},
 };
 
+use chrono::{DateTime, Utc};
 use oauth2::{
     basic::BasicClient, reqwest::http_client, AuthUrl, AuthorizationCode, ClientId, ClientSecret,
-    RedirectUrl, TokenUrl,
+    RedirectUrl, TokenResponse, TokenUrl,
 };
+use rusqlite::Connection;
 use url::Url;
 
-pub fn handle_new_account() {
+use crate::Application;
+
+struct Account {
+    access_token: String,
+    refresh_token: String,
+    email: String,
+    expiry: DateTime<Utc>,
+}
+
+pub fn handle_new_account(application: &Application) {
     // Create the redirect url to show to the user
     let auth_url_raw = String::from("https://accounts.google.com/o/oauth2/v2/auth");
     let auth_url = AuthUrl::new(auth_url_raw).expect("Invalid auth endpoint");
@@ -52,7 +63,7 @@ pub fn handle_new_account() {
     for stream in listener.incoming() {
         let stream = stream.unwrap();
 
-        let result = handle_connection(stream, &address, &client);
+        let result = handle_connection(stream, &address, &client, &application);
         println!("Result: {:?}", result);
     }
 }
@@ -61,6 +72,7 @@ fn handle_connection(
     mut stream: TcpStream,
     address: &str,
     oauth_client: &BasicClient,
+    application: &Application,
 ) -> Result<(), NewAccountError> {
     let buf_reader = BufReader::new(&mut stream);
     let request_line = buf_reader.lines().next().unwrap().unwrap();
@@ -87,9 +99,55 @@ fn handle_connection(
         .map_err(|e| {
             println!("Error: {:?}", e);
             NewAccountError::FailedTokenExchange
-        });
+        })?;
+
+    let account = Account {
+        access_token: auth_token.access_token().secret().into(),
+        refresh_token: auth_token
+            .refresh_token()
+            .ok_or(NewAccountError::FailedTokenExchange)?
+            .secret()
+            .into(),
+        email: "test@test.com".into(),
+        expiry: Utc::now()
+            + auth_token
+                .expires_in()
+                .ok_or(NewAccountError::FailedTokenExchange)?,
+    };
+
+    store_account(account, application)?;
 
     return Ok(());
+}
+
+fn store_account(account: Account, application: &Application) -> Result<(), NewAccountError> {
+    let db = Connection::open(&application.db_path).unwrap();
+
+    db.execute(
+        "CREATE TABLE IF NOT EXISTS accounts(
+                id integer PRIMARY KEY,
+                email text NOT NULL UNIQUE,
+                access_token text NOT NULL,
+                refresh_token text NOT NULL,
+                expires_at text NOT NULL
+            )",
+        [],
+    )
+    .map_err(|e| {
+        println!("Error creating accounts table: {:?}", e);
+        NewAccountError::SqliteError
+    })?;
+
+    db.execute(
+        "INSERT INTO accounts (email, access_token, refresh_token, expires_at) VALUES (?1, ?2, ?3, ?4)",
+        [account.email, account.access_token, account.refresh_token, account.expiry.to_rfc3339()],
+        )
+        .map_err(|e| {
+            println!("Error inserting account: {:?}", e);
+            NewAccountError::SqliteError
+        })?;
+
+    Ok(())
 }
 
 #[derive(Debug)]
@@ -98,4 +156,5 @@ enum NewAccountError {
     InvalidRedirectUrl,
     MissingAuthCode,
     FailedTokenExchange,
+    SqliteError,
 }
