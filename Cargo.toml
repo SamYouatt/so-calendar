@@ -11,5 +11,7 @@ clap = { version = "4.5.4", features = ["derive"] }
 dirs-next = "2.0.0"
 httparse = "1.8.0"
 oauth2 = "4.4.2"
+reqwest = { version = "0.12.4", features = ["json", "blocking"] }
 rusqlite = "0.31.0"
+serde = { version = "1.0.200", features = ["derive"] }
 url = "2.5.0"

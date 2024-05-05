@@ -10,6 +10,7 @@ use oauth2::{
     RedirectUrl, TokenResponse, TokenUrl,
 };
 use rusqlite::Connection;
+use serde::Deserialize;
 use url::Url;
 
 use crate::Application;
@@ -19,6 +20,11 @@ struct Account {
     refresh_token: String,
     email: String,
     expiry: DateTime<Utc>,
+}
+
+#[derive(Deserialize)]
+struct UserProfile {
+    email: String,
 }
 
 pub fn handle_new_account(application: &Application) {
@@ -101,14 +107,31 @@ fn handle_connection(
             NewAccountError::FailedTokenExchange
         })?;
 
+    let access_token = auth_token.access_token().secret().to_string();
+
+    let client = reqwest::blocking::Client::new();
+    let profile = client
+        .get("https://openidconnect.googleapis.com/v1/userinfo")
+        .bearer_auth(&access_token)
+        .send()
+        .map_err(|e| {
+            println!("Failed to retrieve profile: {:?}", e);
+            NewAccountError::FailedProfileRetrieve
+        })?;
+
+    let profile = profile.json::<UserProfile>().map_err(|e| {
+        println!("Failed to deserialize profile response: {:?}", e);
+        NewAccountError::FailedProfileRetrieve
+    })?;
+
     let account = Account {
-        access_token: auth_token.access_token().secret().into(),
+        access_token,
         refresh_token: auth_token
             .refresh_token()
             .ok_or(NewAccountError::FailedTokenExchange)?
             .secret()
             .into(),
-        email: "test@test.com".into(),
+        email: profile.email,
         expiry: Utc::now()
             + auth_token
                 .expires_in()
@@ -156,5 +179,6 @@ enum NewAccountError {
     InvalidRedirectUrl,
     MissingAuthCode,
     FailedTokenExchange,
+    FailedProfileRetrieve,
     SqliteError,
 }
