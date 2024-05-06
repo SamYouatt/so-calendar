@@ -30,6 +30,11 @@ pub fn handle_list_accounts(application: &Application) {
         .collect::<Result<Vec<_>, _>>()
         .unwrap();
 
+    if accounts.len() == 0 {
+        println!("No accounts connected...\n");
+        println!("To link an account run: `socal account new`");
+    }
+
     for account in accounts {
         println!("{}", account);
     }
