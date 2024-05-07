@@ -3,7 +3,7 @@ use clap::Parser;
 use configuration::Application;
 
 use crate::features::list_accounts::handle_list_accounts;
-use crate::features::new_account::handle_new_account;
+use crate::features::new_account::handle_new_account::handle_new_account;
 
 mod args;
 mod features;
