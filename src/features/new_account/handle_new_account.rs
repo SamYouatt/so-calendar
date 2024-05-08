@@ -1,10 +1,13 @@
 use std::net::TcpListener;
 
 use chrono::{DateTime, Utc};
+use crossterm::event::{self, Event, KeyCode, KeyEventKind};
 use oauth2::{CsrfToken, PkceCodeChallenge, Scope};
 use serde::Deserialize;
 
 use crate::{features::new_account::tcp_request_handler::handle_tcp_request, Application};
+
+use super::url_tui::{init_terminal, restore_terminal, update, view, Message, Model, RunningState};
 
 pub struct Account {
     pub access_token: String,
@@ -32,8 +35,10 @@ pub fn handle_new_account(application: &Application) {
         .set_pkce_challenge(pkce_challenge)
         .url();
 
-    println!("Open the link below in your browser to connect a Google account");
-    println!("> {}", auth_url);
+    // println!("Open the link below in your browser to connect a Google account");
+    // println!("> {}", auth_url);
+
+    interactive_auth_prompt();
 
     // Create a tcp server to listen for the redirect response
     let address = "localhost:42069";
@@ -51,5 +56,56 @@ pub fn handle_new_account(application: &Application) {
             pkce_verifier,
         );
         return;
+    }
+}
+
+fn interactive_auth_prompt() {
+    let mut terminal = init_terminal().unwrap();
+
+    let options = [
+        "Open browser".into(),
+        "Copy sign in url to clipboard".into(),
+    ];
+    let mut model = Model::new(&options);
+
+    while model.state == RunningState::Running {
+        terminal.draw(|frame| view(&mut model, frame)).unwrap();
+
+        let message = handle_event();
+
+        if message.is_some() {
+            update(&mut model, message.unwrap());
+        }
+    }
+
+    restore_terminal(&mut terminal).unwrap();
+
+    match model.state {
+        RunningState::SelectionMade(selection) => {
+            println!("Selected {}", selection);
+            std::process::exit(0);
+        },
+        RunningState::Exited => std::process::exit(0),
+        RunningState::Running => unreachable!(),
+    }
+}
+
+fn handle_event() -> Option<Message> {
+    if let Event::Key(key) = event::read().unwrap() {
+        if key.kind == KeyEventKind::Press {
+            return handle_key(key);
+        }
+    }
+
+    None
+}
+
+fn handle_key(key: event::KeyEvent) -> Option<Message> {
+    match key.code {
+        KeyCode::Up => Some(Message::Previous),
+        KeyCode::Down => Some(Message::Next),
+        KeyCode::Enter => Some(Message::Select),
+        KeyCode::Esc => Some(Message::Quit),
+        _ => None,
     }
 }
