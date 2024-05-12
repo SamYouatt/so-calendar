@@ -35,12 +35,10 @@ pub fn handle_new_account(application: &Application) {
         .set_pkce_challenge(pkce_challenge)
         .url();
 
-    // println!("Open the link below in your browser to connect a Google account");
-    // println!("> {}", auth_url);
-
     interactive_auth_prompt();
 
-    // Create a tcp server to listen for the redirect response
+    println!("Waiting for you to log in...");
+
     let address = "localhost:42069";
     let listener = TcpListener::bind(&address).expect("Failed to bind tcp listener");
 
@@ -62,11 +60,7 @@ pub fn handle_new_account(application: &Application) {
 fn interactive_auth_prompt() {
     let mut terminal = init_terminal().unwrap();
 
-    let options = [
-        "Open browser".into(),
-        "Copy sign in url to clipboard".into(),
-    ];
-    let mut model = Model::new(&options);
+    let mut model = Model::new();
 
     while model.state == RunningState::Running {
         terminal.draw(|frame| view(&mut model, frame)).unwrap();
@@ -82,8 +76,14 @@ fn interactive_auth_prompt() {
 
     match model.state {
         RunningState::SelectionMade(selection) => {
-            println!("Selected {}", selection);
-            std::process::exit(0);
+            restore_terminal(&mut terminal).unwrap();
+
+            println!("Selected {:?}", selection);
+            // TODO: either copy to clipboard or open the browser
+            // clear the terminal and inform the user that we are waiting for them to login
+            // then return control back to the caller to handle the tcp request
+
+            return;
         },
         RunningState::Exited => std::process::exit(0),
         RunningState::Running => unreachable!(),

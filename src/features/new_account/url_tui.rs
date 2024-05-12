@@ -1,6 +1,6 @@
 use std::io::{self, stdout, Stdout};
 
-use crossterm::{execute, terminal::{self, disable_raw_mode, enable_raw_mode}};
+use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
 use ratatui::{
     prelude::*,
     widgets::{Block, Borders, HighlightSpacing, List, ListDirection, ListItem, ListState},
@@ -9,7 +9,7 @@ use ratatui::{
 #[derive(Debug, PartialEq)]
 pub enum RunningState {
     Running,
-    SelectionMade(usize),
+    SelectionMade(LoginOption),
     Exited,
 }
 
@@ -20,20 +20,49 @@ pub enum Message {
     Quit,
 }
 
-pub struct Model {
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub enum LoginOption {
+    OpenBrowser,
+    CopyToClipboard,
+}
+
+#[derive(Copy, Clone)]
+struct LoginOptionItem<'a> {
+    text: &'a str,
+    option: LoginOption,
+}
+
+impl<'a> Into<ListItem<'a>> for LoginOptionItem<'_> {
+    fn into(self) -> ListItem<'a> {
+        self.text.to_owned().into()
+    }
+}
+
+pub struct Model<'a> {
     list_state: ListState,
-    items: Vec<String>,
+    items: Vec<LoginOptionItem<'a>>,
     pub state: RunningState,
 }
 
-impl Model {
-    pub fn new(items: &[String]) -> Self {
+impl<'a> Model<'a> {
+    pub fn new() -> Self {
         let mut list_state = ListState::default();
         list_state.select(Some(0));
 
+        let options = vec![
+            LoginOptionItem {
+                text: "Open browser".into(),
+                option: LoginOption::OpenBrowser,
+            },
+            LoginOptionItem {
+                text: "Copy link to clipboard".into(),
+                option: LoginOption::CopyToClipboard,
+            },
+        ];
+
         Model {
             list_state,
-            items: items.to_vec(),
+            items: options,
             state: RunningState::Running,
         }
     }
@@ -70,7 +99,15 @@ pub fn update(model: &mut Model, msg: Message) {
             model.list_state.select(Some(i));
         }
         Message::Select => {
-            model.state = RunningState::SelectionMade(model.list_state.selected().unwrap())
+            let selected_state = model
+                .list_state
+                .selected()
+                .expect("Not possible to have an unselected item");
+            let selected_option = model
+                .items
+                .get(selected_state)
+                .expect("Not possible to have an unselected item");
+            model.state = RunningState::SelectionMade(selected_option.option)
         }
         Message::Quit => {
             model.state = RunningState::Exited;
@@ -79,13 +116,7 @@ pub fn update(model: &mut Model, msg: Message) {
 }
 
 pub fn view(model: &mut Model, f: &mut Frame) {
-    let list_items: Vec<_> = model
-        .items
-        .iter()
-        .map(|element| ListItem::new(element.clone()))
-        .collect();
-
-    let list = List::new(list_items)
+    let list = List::new(model.items.clone())
         .block(
             Block::default()
                 .title("Link account")
