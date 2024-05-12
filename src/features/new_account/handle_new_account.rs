@@ -74,8 +74,6 @@ fn interactive_auth_prompt(auth_url: Url) {
         }
     }
 
-    restore_terminal(&mut terminal).unwrap();
-
     match model.state {
         RunningState::SelectionMade(selection) => {
             restore_terminal(&mut terminal).unwrap();
@@ -85,7 +83,9 @@ fn interactive_auth_prompt(auth_url: Url) {
             // then return control back to the caller to handle the tcp request
 
             match selection {
-                super::url_tui::LoginOption::OpenBrowser => todo!(),
+                super::url_tui::LoginOption::OpenBrowser => {
+                    open::that(auth_url.as_str()).unwrap();
+                },
                 super::url_tui::LoginOption::CopyToClipboard => {
                     let mut clipboard = ClipboardContext::new().unwrap();
                     clipboard.set_contents(auth_url.into()).unwrap();

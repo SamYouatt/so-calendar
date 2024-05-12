@@ -20,6 +20,7 @@ crossterm = "0.27.0"
 dirs-next = "2.0.0"
 httparse = "1.8.0"
 oauth2 = "4.4.2"
+open = "5.1.2"
 ratatui = "0.26.2"
 reqwest = { version = "0.12.4", features = ["json", "blocking"] }
 rusqlite = "0.31.0"
