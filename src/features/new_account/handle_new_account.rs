@@ -1,9 +1,11 @@
 use std::net::TcpListener;
 
 use chrono::{DateTime, Utc};
+use copypasta::{ClipboardContext, ClipboardProvider};
 use crossterm::event::{self, Event, KeyCode, KeyEventKind};
 use oauth2::{CsrfToken, PkceCodeChallenge, Scope};
 use serde::Deserialize;
+use url::Url;
 
 use crate::{features::new_account::tcp_request_handler::handle_tcp_request, Application};
 
@@ -35,7 +37,7 @@ pub fn handle_new_account(application: &Application) {
         .set_pkce_challenge(pkce_challenge)
         .url();
 
-    interactive_auth_prompt();
+    interactive_auth_prompt(auth_url);
 
     println!("Waiting for you to log in...");
 
@@ -57,7 +59,7 @@ pub fn handle_new_account(application: &Application) {
     }
 }
 
-fn interactive_auth_prompt() {
+fn interactive_auth_prompt(auth_url: Url) {
     let mut terminal = init_terminal().unwrap();
 
     let mut model = Model::new();
@@ -78,13 +80,20 @@ fn interactive_auth_prompt() {
         RunningState::SelectionMade(selection) => {
             restore_terminal(&mut terminal).unwrap();
 
-            println!("Selected {:?}", selection);
             // TODO: either copy to clipboard or open the browser
             // clear the terminal and inform the user that we are waiting for them to login
             // then return control back to the caller to handle the tcp request
 
+            match selection {
+                super::url_tui::LoginOption::OpenBrowser => todo!(),
+                super::url_tui::LoginOption::CopyToClipboard => {
+                    let mut clipboard = ClipboardContext::new().unwrap();
+                    clipboard.set_contents(auth_url.into()).unwrap();
+                }
+            };
+
             return;
-        },
+        }
         RunningState::Exited => std::process::exit(0),
         RunningState::Running => unreachable!(),
     }
