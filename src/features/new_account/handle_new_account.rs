@@ -52,13 +52,13 @@ pub fn handle_new_account(application: &Application) -> Result<()> {
         let stream = stream.wrap_err("Error accepting tcp connection")?;
 
         // TODO: handle errors and exit
-        let _ = handle_tcp_request(
+        handle_tcp_request(
             stream,
             address,
             &application.oauth_client,
             application,
             pkce_verifier,
-        );
+        )?;
 
         break;
     }
