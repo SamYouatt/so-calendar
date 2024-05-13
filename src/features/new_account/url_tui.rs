@@ -32,9 +32,9 @@ struct LoginOptionItem<'a> {
     option: LoginOption,
 }
 
-impl<'a> Into<ListItem<'a>> for LoginOptionItem<'_> {
-    fn into(self) -> ListItem<'a> {
-        self.text.to_owned().into()
+impl <'a> From<LoginOptionItem<'a>> for ListItem<'a> {
+    fn from(val: LoginOptionItem<'a>) -> Self {
+        val.text.into()
     }
 }
 
@@ -51,11 +51,11 @@ impl<'a> Model<'a> {
 
         let options = vec![
             LoginOptionItem {
-                text: "Open browser".into(),
+                text: "Open browser",
                 option: LoginOption::OpenBrowser,
             },
             LoginOptionItem {
-                text: "Copy link to clipboard".into(),
+                text: "Copy link to clipboard",
                 option: LoginOption::CopyToClipboard,
             },
         ];

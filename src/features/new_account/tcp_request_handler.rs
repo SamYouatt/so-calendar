@@ -78,5 +78,5 @@ pub fn handle_tcp_request(
 
     store_account(account, application)?;
 
-    return Ok(());
+    Ok(())
 }

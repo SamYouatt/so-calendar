@@ -1,4 +1,3 @@
-use eyre::eyre;
 use std::net::TcpListener;
 
 use chrono::{DateTime, Utc};
@@ -47,7 +46,7 @@ pub fn handle_new_account(application: &Application) -> Result<()> {
     println!("Waiting for you to log in...");
 
     let address = "localhost:42069";
-    let listener = TcpListener::bind(&address).expect("Failed to bind tcp listener");
+    let listener = TcpListener::bind(address).expect("Failed to bind tcp listener");
 
     for stream in listener.incoming() {
         let stream = stream.wrap_err("Error accepting tcp connection")?;
@@ -55,9 +54,9 @@ pub fn handle_new_account(application: &Application) -> Result<()> {
         // TODO: handle errors and exit
         let _ = handle_tcp_request(
             stream,
-            &address,
+            address,
             &application.oauth_client,
-            &application,
+            application,
             pkce_verifier,
         );
 

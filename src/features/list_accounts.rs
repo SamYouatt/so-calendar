@@ -4,11 +4,6 @@ use std::fmt::Display;
 
 use crate::Application;
 
-#[derive(Debug)]
-enum ListAccountErrors {
-    FailedToReadAccounts,
-}
-
 struct Account {
     email: String,
 }
@@ -30,7 +25,7 @@ pub fn handle_list_accounts(application: &Application) -> Result<()> {
         .wrap_err("Failed to read accounts")?
         .collect::<Result<Vec<_>, _>>()?;
 
-    if accounts.len() == 0 {
+    if accounts.is_empty() {
         println!("No accounts connected...\n");
         println!("To link an account run: `socal account new`");
     }
