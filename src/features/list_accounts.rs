@@ -2,6 +2,7 @@ use color_eyre::eyre::Result;
 use eyre::Context;
 use std::fmt::Display;
 
+use super::oauth_http_client::OAuthHttpClient;
 use crate::Application;
 
 struct Account {
@@ -15,6 +16,11 @@ impl Display for Account {
 }
 
 pub fn handle_list_accounts(application: &Application) -> Result<()> {
+    let oauth_client = OAuthHttpClient::new(&application.db);
+    let client = reqwest::blocking::Client::new();
+    let request = client.get("www.google.com");
+    let _test = oauth_client.send("sdyouatt@gmail.com".into(), request);
+
     let mut statement = application
         .db
         .prepare("SELECT email FROM accounts")
