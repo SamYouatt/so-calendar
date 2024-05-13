@@ -32,7 +32,7 @@ struct LoginOptionItem<'a> {
     option: LoginOption,
 }
 
-impl <'a> From<LoginOptionItem<'a>> for ListItem<'a> {
+impl<'a> From<LoginOptionItem<'a>> for ListItem<'a> {
     fn from(val: LoginOptionItem<'a>) -> Self {
         val.text.into()
     }

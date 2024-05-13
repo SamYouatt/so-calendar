@@ -7,6 +7,6 @@ fn main() -> Result<()> {
     let application = Application::setup()?;
 
     run(application)?;
-    
+
     Ok(())
 }
