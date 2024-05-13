@@ -1,12 +1,9 @@
+use color_eyre::eyre::Result;
+use eyre::Context;
 use std::{fs, path::PathBuf};
 
 use oauth2::{basic::BasicClient, AuthUrl, ClientId, ClientSecret, RedirectUrl, TokenUrl};
 use rusqlite::Connection;
-
-#[derive(Debug)]
-pub enum ConfigurationError {
-    FailedToCreateAccounts,
-}
 
 pub struct Application {
     pub data_dir: PathBuf,
@@ -16,7 +13,7 @@ pub struct Application {
 }
 
 impl Application {
-    pub fn setup() -> Result<Self, ConfigurationError> {
+    pub fn setup() -> Result<Self> {
         let data_dir = dirs_next::data_dir()
             .expect("Unable to find data directory")
             .join("so-calendar");
@@ -36,12 +33,12 @@ impl Application {
     }
 }
 
-fn configure_oauth_client() -> Result<BasicClient, ConfigurationError> {
+fn configure_oauth_client() -> Result<BasicClient> {
     let auth_url_raw = String::from("https://accounts.google.com/o/oauth2/v2/auth");
-    let auth_url = AuthUrl::new(auth_url_raw).expect("Invalid auth endpoint");
+    let auth_url = AuthUrl::new(auth_url_raw).wrap_err("Invalid auth url")?;
 
     let token_url_raw = String::from("https://www.googleapis.com/oauth2/v3/token");
-    let token_url = TokenUrl::new(token_url_raw).expect("Invalid token endpoint");
+    let token_url = TokenUrl::new(token_url_raw).wrap_err("Invalid token endpoint")?;
 
     Ok(BasicClient::new(
         ClientId::new(
@@ -59,8 +56,8 @@ fn configure_oauth_client() -> Result<BasicClient, ConfigurationError> {
     ))
 }
 
-fn setup_database(db_path: &PathBuf) -> Result<Connection, ConfigurationError> {
-    let db = Connection::open(db_path).unwrap();
+fn setup_database(db_path: &PathBuf) -> Result<Connection> {
+    let db = Connection::open(db_path).wrap_err("Failed to connect to sqlite database")?;
 
     db.execute(
         "CREATE TABLE IF NOT EXISTS accounts(
@@ -72,10 +69,7 @@ fn setup_database(db_path: &PathBuf) -> Result<Connection, ConfigurationError> {
                 )",
         [],
     )
-    .map_err(|e| {
-        println!("Error creating accounts table: {:?}", e);
-        ConfigurationError::FailedToCreateAccounts
-    })?;
+    .wrap_err("Failed to set up accounts table")?;
 
     Ok(db)
 }

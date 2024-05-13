@@ -1,10 +1,14 @@
+use eyre::eyre;
 use std::net::TcpListener;
 
 use chrono::{DateTime, Utc};
+use color_eyre::eyre::Result;
 use copypasta::{ClipboardContext, ClipboardProvider};
 use crossterm::event::{self, Event, KeyCode, KeyEventKind};
+use eyre::Context;
 use oauth2::{CsrfToken, PkceCodeChallenge, Scope};
 use serde::Deserialize;
+use thiserror::Error;
 use url::Url;
 
 use crate::{features::new_account::tcp_request_handler::handle_tcp_request, Application};
@@ -23,7 +27,7 @@ pub struct UserProfile {
     pub email: String,
 }
 
-pub fn handle_new_account(application: &Application) {
+pub fn handle_new_account(application: &Application) -> Result<()> {
     let (pkce_challenge, pkce_verifier) = PkceCodeChallenge::new_random_sha256();
 
     let (auth_url, _) = application
@@ -37,7 +41,8 @@ pub fn handle_new_account(application: &Application) {
         .set_pkce_challenge(pkce_challenge)
         .url();
 
-    interactive_auth_prompt(auth_url);
+    // TODO: handle failure to open browser or clipboard by presenting plain link
+    interactive_auth_prompt(auth_url)?;
 
     println!("Waiting for you to log in...");
 
@@ -45,7 +50,7 @@ pub fn handle_new_account(application: &Application) {
     let listener = TcpListener::bind(&address).expect("Failed to bind tcp listener");
 
     for stream in listener.incoming() {
-        let stream = stream.unwrap();
+        let stream = stream.wrap_err("Error accepting tcp connection")?;
 
         // TODO: handle errors and exit
         let _ = handle_tcp_request(
@@ -55,58 +60,71 @@ pub fn handle_new_account(application: &Application) {
             &application,
             pkce_verifier,
         );
-        return;
+
+        break;
     }
+
+    Ok(())
 }
 
-fn interactive_auth_prompt(auth_url: Url) {
-    let mut terminal = init_terminal().unwrap();
+#[derive(Debug, Error)]
+enum InteractionError {
+    #[error("Failed to open browser")]
+    FailedOpeningBrowser(#[from] std::io::Error),
+    #[error("Failed to copy to system clipboard: {0}")]
+    FailedCopyToClipboard(String),
+    #[error("Unexpected error during interactive terminal")]
+    UnexpectedError(#[from] eyre::Error),
+}
+
+fn interactive_auth_prompt(auth_url: Url) -> Result<(), InteractionError> {
+    let mut terminal = init_terminal()?;
 
     let mut model = Model::new();
 
     while model.state == RunningState::Running {
-        terminal.draw(|frame| view(&mut model, frame)).unwrap();
+        terminal.draw(|frame| view(&mut model, frame))?;
 
-        let message = handle_event();
-
-        if message.is_some() {
-            update(&mut model, message.unwrap());
+        if let Some(message) = handle_event().wrap_err("Unable to read terminal input")? {
+            update(&mut model, message);
         }
     }
 
     match model.state {
         RunningState::SelectionMade(selection) => {
-            restore_terminal(&mut terminal).unwrap();
-
-            // TODO: either copy to clipboard or open the browser
-            // clear the terminal and inform the user that we are waiting for them to login
-            // then return control back to the caller to handle the tcp request
+            restore_terminal(&mut terminal)?;
 
             match selection {
                 super::url_tui::LoginOption::OpenBrowser => {
-                    open::that(auth_url.as_str()).unwrap();
-                },
+                    open::that(auth_url.as_str())?;
+                }
                 super::url_tui::LoginOption::CopyToClipboard => {
-                    let mut clipboard = ClipboardContext::new().unwrap();
-                    clipboard.set_contents(auth_url.into()).unwrap();
+                    let mut clipboard = ClipboardContext::new()
+                        .map_err(|e| InteractionError::FailedCopyToClipboard(e.to_string()))?;
+                    clipboard
+                        .set_contents(auth_url.into())
+                        .map_err(|e| InteractionError::FailedCopyToClipboard(e.to_string()))?;
                 }
             };
 
-            return;
+            Ok(())
         }
-        RunningState::Exited => std::process::exit(0),
+        RunningState::Exited => {
+            restore_terminal(&mut terminal)?;
+            std::process::exit(0);
+        }
         RunningState::Running => unreachable!(),
     }
 }
 
-fn handle_event() -> Option<Message> {
-    if let Event::Key(key) = event::read().unwrap() {
+fn handle_event() -> Result<Option<Message>> {
+    if let Event::Key(key) = event::read()? {
         if key.kind == KeyEventKind::Press {
-            return handle_key(key);
+            return Ok(handle_key(key));
         }
     }
 
-    None
+    Ok(None)
 }
 
 fn handle_key(key: event::KeyEvent) -> Option<Message> {

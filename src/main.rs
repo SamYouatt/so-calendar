@@ -1,7 +1,12 @@
+use color_eyre::eyre::Result;
 use socal::{configuration::Application, run};
 
-fn main() {
-    let application = Application::setup().unwrap();
+fn main() -> Result<()> {
+    color_eyre::install()?;
 
-    run(application);
+    let application = Application::setup()?;
+
+    run(application)?;
+    
+    Ok(())
 }

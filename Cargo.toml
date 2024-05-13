@@ -15,9 +15,11 @@ path = "src/main.rs"
 [dependencies]
 chrono = "0.4.38"
 clap = { version = "4.5.4", features = ["derive"] }
+color-eyre = "0.6.3"
 copypasta = "0.10.1"
 crossterm = "0.27.0"
 dirs-next = "2.0.0"
+eyre = "0.6.12"
 httparse = "1.8.0"
 oauth2 = "4.4.2"
 open = "5.1.2"
@@ -25,4 +27,5 @@ ratatui = "0.26.2"
 reqwest = { version = "0.12.4", features = ["json", "blocking"] }
 rusqlite = "0.31.0"
 serde = { version = "1.0.200", features = ["derive"] }
+thiserror = "1.0.60"
 url = "2.5.0"

@@ -1,3 +1,5 @@
+use color_eyre::eyre::Result;
+use eyre::Context;
 use std::fmt::Display;
 
 use crate::Application;
@@ -17,7 +19,7 @@ impl Display for Account {
     }
 }
 
-pub fn handle_list_accounts(application: &Application) {
+pub fn handle_list_accounts(application: &Application) -> Result<()> {
     let mut statement = application
         .db
         .prepare("SELECT email FROM accounts")
@@ -25,10 +27,8 @@ pub fn handle_list_accounts(application: &Application) {
 
     let accounts: Vec<Account> = statement
         .query_map([], |row| Ok(Account { email: row.get(0)? }))
-        .map_err(|_| ListAccountErrors::FailedToReadAccounts)
-        .unwrap()
-        .collect::<Result<Vec<_>, _>>()
-        .unwrap();
+        .wrap_err("Failed to read accounts")?
+        .collect::<Result<Vec<_>, _>>()?;
 
     if accounts.len() == 0 {
         println!("No accounts connected...\n");
@@ -38,4 +38,6 @@ pub fn handle_list_accounts(application: &Application) {
     for account in accounts {
         println!("{}", account);
     }
+
+    Ok(())
 }

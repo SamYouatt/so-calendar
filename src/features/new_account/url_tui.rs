@@ -148,7 +148,7 @@ pub fn init_terminal() -> io::Result<Tui> {
 }
 
 pub fn restore_terminal(terminal: &mut Tui) -> io::Result<()> {
-    terminal.clear().unwrap();
+    terminal.clear()?;
     disable_raw_mode()?;
     terminal.show_cursor()?;
     Ok(())
