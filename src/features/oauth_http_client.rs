@@ -57,7 +57,7 @@ impl<'a> GoogleOAuthClient<'a> {
     ) -> Result<reqwest::blocking::Response, OAuthHttpClientError> {
         let mut statement = self
             .db
-            .prepare("SELECT (auth_token, refresh_token, expires_at) FROM accounts WHERE email = ?1 LIMIT 1")
+            .prepare("SELECT access_token, refresh_token, expires_at FROM accounts WHERE email = ?1 LIMIT 1")
             .wrap_err("Error preparing query to read account tokens")?;
         let mut query_rows = statement.query([&account_email])?;
 
@@ -68,7 +68,7 @@ impl<'a> GoogleOAuthClient<'a> {
 
         let desired_expiration_time = Utc::now() + Duration::minutes(10);
 
-        let auth_token = if token_details.expires_at < desired_expiration_time {
+        let access_token = if token_details.expires_at < desired_expiration_time {
             let refresh_token = RefreshToken::new(token_details.refresh_token);
             let token_response = self
                 .oauth_client
@@ -76,12 +76,36 @@ impl<'a> GoogleOAuthClient<'a> {
                 .request(http_client)
                 .wrap_err("Failed to exchange refresh token")?;
 
-            token_response.access_token().secret().to_owned()
+            let new_access_token = token_response.access_token().secret().to_owned();
+            let new_expiry = Utc::now()
+                + token_response
+                    .expires_in()
+                    .unwrap_or(std::time::Duration::from_secs(3600));
+
+            upsert_access_token_details(&self.db, &new_access_token, new_expiry, &account_email)?;
+
+            new_access_token
         } else {
             token_details.access_token
         };
 
-        let result = request_builder.bearer_auth(auth_token).send()?;
+        // Step 4: store the new access token and expiration date if there was one
+
+        let result = request_builder.bearer_auth(access_token).send()?;
         Ok(result)
     }
+}
+
+fn upsert_access_token_details(
+    db: &Connection,
+    access_token: &str,
+    expires_at: DateTime<Utc>,
+    account_email: &str,
+) -> Result<(), OAuthHttpClientError> {
+    db.execute(
+        "UPDATE accounts SET access_token = ?1, expires_at = ?2 WHERE email = ?3",
+        [access_token, &expires_at.to_rfc3339(), account_email],
+    )?;
+
+    Ok(())
 }
