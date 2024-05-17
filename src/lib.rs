@@ -9,16 +9,19 @@ use crate::features::new_account::handle_new_account::handle_new_account;
 mod args;
 pub mod configuration;
 mod features;
+mod tui;
 
 pub fn run(application: Application) -> Result<()> {
-    let args = SoCalArgs::parse();
+    tui::run_tui()
 
-    match args.entity {
-        args::Entity::Account(account_command) => match account_command.command {
-            args::AccountSubcommand::New => handle_new_account(&application)?,
-            args::AccountSubcommand::List => handle_list_accounts(&application)?,
-        },
-    };
+    // let args = SoCalArgs::parse();
 
-    Ok(())
+    // match args.entity {
+    //     args::Entity::Account(account_command) => match account_command.command {
+    //         args::AccountSubcommand::New => handle_new_account(&application)?,
+    //         args::AccountSubcommand::List => handle_list_accounts(&application)?,
+    //     },
+    // };
+
+    // Ok(())
 }
