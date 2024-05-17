@@ -21,7 +21,7 @@ async fn main() -> Result<()> {
 
     let application = Application::setup()?;
 
-    run(application)?;
+    run(application).await?;
 
     Ok(())
 }

@@ -13,24 +13,28 @@ use ratatui::{
     Frame, Terminal,
 };
 use std::io::stdout;
+use tokio::sync::mpsc;
 
-#[derive(Default)]
+type MessageSender = mpsc::UnboundedSender<Message>;
+
 struct Model {
-    running_state: RunningState,
+    running_state: CurrentState,
+    message_sender: MessageSender,
 }
 
-#[derive(Default, Debug, PartialEq, Eq)]
-enum RunningState {
-    #[default]
+#[derive(Debug, PartialEq, Eq)]
+enum CurrentState {
     Calendar,
     NewAccountModal,
+
+    // The app should close
     Done,
 }
 
+#[derive(Debug)]
 enum Message {
     OpenNewAccountModal,
     CloseModal,
-
     Quit,
 }
 
@@ -38,7 +42,7 @@ fn update(model: &mut Model, msg: Message) -> Option<Message> {
     match msg {
         Message::OpenNewAccountModal => {}
         Message::CloseModal => todo!(),
-        Message::Quit => model.running_state = RunningState::Done,
+        Message::Quit => model.running_state = CurrentState::Done,
     };
 
     None
@@ -48,20 +52,37 @@ fn view(_model: &Model, frame: &mut Frame) {
     let block = Block::default()
         .borders(Borders::ALL)
         .border_set(border::THICK);
-
     let widget = Paragraph::new("SoCalendar").centered().block(block);
 
     frame.render_widget(widget, frame.size());
 }
 
-fn handle_event(_model: &Model) -> Result<Option<Message>> {
-    if let Event::Key(key) = event::read()? {
-        if key.kind == event::KeyEventKind::Press {
-            return Ok(handle_key(key));
-        }
-    }
+fn handle_event(_model: &Model, message_sender: MessageSender) -> tokio::task::JoinHandle<()> {
+    tokio::spawn(async move {
+        loop {
+            let message =
+                if let Event::Key(key) = event::read().expect("Failed to read crossterm event") {
+                    if key.kind == event::KeyEventKind::Press {
+                        handle_key(key)
+                    } else {
+                        None
+                    }
+                } else {
+                    None
+                };
 
-    Ok(None)
+            println!("Got message: {:?}", message);
+
+            if message.is_none() {
+                continue;
+            }
+
+            if let Err(_) = message_sender.send(message.unwrap()) {
+                // TODO: nicer handling here
+                break;
+            }
+        }
+    })
 }
 
 fn handle_key(key: event::KeyEvent) -> Option<Message> {
@@ -85,20 +106,32 @@ fn restore_terminal() -> Result<()> {
     Ok(())
 }
 
-pub fn run_tui() -> Result<()> {
-    // create terminal here
-    let mut terminal = init_terminal()?;
-    let mut model = Model::default();
+pub async fn run_tui() -> Result<()> {
+    let (message_sender, mut message_receiver) = mpsc::unbounded_channel();
 
-    while model.running_state != RunningState::Done {
+    let mut terminal = init_terminal()?;
+    let mut model = Model {
+        running_state: CurrentState::Calendar,
+        message_sender,
+    };
+
+    let event_thread = handle_event(&model, model.message_sender.clone());
+
+    loop {
         terminal.draw(|frame| view(&model, frame))?;
 
-        let mut current_msg = handle_event(&model)?;
+        let mut current_msg = message_receiver.recv().await;
 
         while current_msg.is_some() {
             current_msg = update(&mut model, current_msg.unwrap());
         }
+
+        if model.running_state == CurrentState::Done {
+            break;
+        }
     }
+
+    event_thread.abort();
 
     restore_terminal()
 }

@@ -11,8 +11,8 @@ pub mod configuration;
 mod features;
 mod tui;
 
-pub fn run(application: Application) -> Result<()> {
-    tui::run_tui()
+pub async fn run(_application: Application) -> Result<()> {
+    tui::run_tui().await
 
     // let args = SoCalArgs::parse();
 
