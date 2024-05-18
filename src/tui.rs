@@ -72,18 +72,16 @@ fn handle_event(
                 break;
             }
 
-            let message = if event::poll(tick_rate).unwrap() {
-                if let Event::Key(key) = event::read().expect("Failed to read crossterm event") {
-                    if key.kind == event::KeyEventKind::Press {
+            let message: Option<Message> = match event::poll(tick_rate) {
+                Ok(true) => match event::read() {
+                    Ok(Event::Key(key)) if key.kind == event::KeyEventKind::Press => {
                         handle_key(key)
-                    } else {
-                        None
                     }
-                } else {
-                    None
-                }
-            } else {
-                None
+                    Ok(_) => None,
+                    Err(_) => None,
+                },
+                Ok(false) => None,
+                Err(_) => None,
             };
 
             if message.is_none() {
