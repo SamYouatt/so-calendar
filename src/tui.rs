@@ -13,7 +13,9 @@ use ratatui::{
     Frame, Terminal,
 };
 use std::io::stdout;
+use std::time::Duration;
 use tokio::sync::mpsc;
+use tokio_util::sync::CancellationToken;
 
 type MessageSender = mpsc::UnboundedSender<Message>;
 
@@ -57,10 +59,20 @@ fn view(_model: &Model, frame: &mut Frame) {
     frame.render_widget(widget, frame.size());
 }
 
-fn handle_event(_model: &Model, message_sender: MessageSender) -> tokio::task::JoinHandle<()> {
+fn handle_event(
+    _model: &Model,
+    message_sender: MessageSender,
+    cancellation_token: CancellationToken,
+) -> tokio::task::JoinHandle<()> {
     tokio::spawn(async move {
+        let tick_rate = Duration::from_millis(5);
+
         loop {
-            let message =
+            if cancellation_token.is_cancelled() {
+                break;
+            }
+
+            let message = if event::poll(tick_rate).unwrap() {
                 if let Event::Key(key) = event::read().expect("Failed to read crossterm event") {
                     if key.kind == event::KeyEventKind::Press {
                         handle_key(key)
@@ -69,9 +81,10 @@ fn handle_event(_model: &Model, message_sender: MessageSender) -> tokio::task::J
                     }
                 } else {
                     None
-                };
-
-            println!("Got message: {:?}", message);
+                }
+            } else {
+                None
+            };
 
             if message.is_none() {
                 continue;
@@ -115,7 +128,12 @@ pub async fn run_tui() -> Result<()> {
         message_sender,
     };
 
-    let event_thread = handle_event(&model, model.message_sender.clone());
+    let cancellation_token = CancellationToken::new();
+    let event_thread = handle_event(
+        &model,
+        model.message_sender.clone(),
+        cancellation_token.clone(),
+    );
 
     loop {
         terminal.draw(|frame| view(&model, frame))?;
@@ -131,7 +149,8 @@ pub async fn run_tui() -> Result<()> {
         }
     }
 
-    event_thread.abort();
+    cancellation_token.cancel();
+    event_thread.await?;
 
     restore_terminal()
 }
