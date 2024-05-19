@@ -7,16 +7,12 @@ pub struct Model {
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum CurrentState {
-    Calendar,
-    NewAccountModal,
-
+    MonthView,
     // The app should close
     Done,
 }
 
 #[derive(Debug)]
 pub enum Message {
-    OpenNewAccountModal,
-    CloseModal,
     Quit,
 }

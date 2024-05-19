@@ -44,7 +44,6 @@ pub fn handle_event(
 
 pub fn handle_key(key: event::KeyEvent) -> Option<Message> {
     match key.code {
-        KeyCode::Char('a') => Some(Message::OpenNewAccountModal),
         KeyCode::Char('q') => Some(Message::Quit),
         _ => None,
     }

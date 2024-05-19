@@ -36,7 +36,7 @@ pub async fn run_tui() -> Result<()> {
 
     let mut terminal = init_terminal()?;
     let mut model = Model {
-        running_state: CurrentState::Calendar,
+        running_state: CurrentState::MonthView,
         message_sender,
     };
 

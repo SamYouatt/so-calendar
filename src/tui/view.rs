@@ -1,14 +1,14 @@
-use ratatui::symbols::border;
 use ratatui::Frame;
-use ratatui::widgets::*;
 
+use crate::features;
+
+use super::model::CurrentState;
 use super::model::Model;
 
-pub fn view(_model: &Model, frame: &mut Frame) {
-    let block = Block::default()
-        .borders(Borders::ALL)
-        .border_set(border::THICK);
-    let widget = Paragraph::new("SoCalendar").centered().block(block);
+pub fn view(model: &Model, frame: &mut Frame) {
+    match model.running_state {
+        CurrentState::MonthView => features::month_overview::view::render(frame),
+        CurrentState::Done => {}
+    };
 
-    frame.render_widget(widget, frame.size());
 }
