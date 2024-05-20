@@ -40,13 +40,12 @@ pub async fn run_tui(application: Application) -> Result<()> {
     let mut model = Model {
         application,
         current_state: CurrentState::MonthView,
-        message_sender,
     };
 
     let cancellation_token = CancellationToken::new();
     let event_thread = handle_event(
         &model,
-        model.message_sender.clone(),
+        message_sender.clone(),
         cancellation_token.clone(),
     );
 
