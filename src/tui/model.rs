@@ -8,11 +8,13 @@ pub struct Model {
 #[derive(Debug, PartialEq, Eq)]
 pub enum CurrentState {
     MonthView,
+    AccountView,
     // The app should close
     Done,
 }
 
 #[derive(Debug)]
 pub enum Message {
+    OpenAccountView,
     Quit,
 }

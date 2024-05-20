@@ -45,6 +45,7 @@ pub fn handle_event(
 pub fn handle_key(key: event::KeyEvent) -> Option<Message> {
     match key.code {
         KeyCode::Char('q') => Some(Message::Quit),
+        KeyCode::Char('a') => Some(Message::OpenAccountView),
         _ => None,
     }
 }
