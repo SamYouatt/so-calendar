@@ -3,23 +3,17 @@ use ratatui::symbols::border;
 use ratatui::widgets::*;
 
 pub fn render(frame: &mut Frame) {
-    let main_layout = Layout::default()
-        .direction(Direction::Horizontal)
-        .constraints(vec![Constraint::Percentage(75), Constraint::Min(22)])
-        .split(frame.size());
+    let main_layout =
+        Layout::horizontal([Constraint::Percentage(75), Constraint::Min(22)]).split(frame.size());
 
-    let calendar_block = Block::default()
-        .title("SoCalendar")
-        .borders(Borders::ALL)
-        .border_set(border::THICK);
+    let calendar_block = Block::bordered()
+        .border_set(border::THICK)
+        .title("SoCalendar");
     let month_view_placeholder = Paragraph::new("Month view")
         .centered()
         .block(calendar_block);
 
-    let today_block = Block::default()
-        .title("19-May")
-        .borders(Borders::ALL)
-        .border_set(border::THICK);
+    let today_block = Block::bordered().border_set(border::THICK).title("19-May");
     let today_view_placeholder = Paragraph::new("Today overview")
         .centered()
         .block(today_block);
