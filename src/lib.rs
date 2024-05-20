@@ -3,7 +3,6 @@ use clap::Parser;
 use color_eyre::eyre::Result;
 use configuration::Application;
 
-use crate::features::list_accounts::handle_list_accounts;
 use crate::features::new_account::handle_new_account::handle_new_account;
 
 mod args;
