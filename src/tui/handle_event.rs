@@ -3,7 +3,10 @@ use std::time::Duration;
 use crossterm::event::{self, Event, KeyCode};
 use tokio_util::sync::CancellationToken;
 
-use super::{model::{Message, Model}, MessageSender};
+use super::{
+    model::{Message, Model},
+    MessageSender,
+};
 
 pub fn handle_event(
     _model: &Model,
@@ -45,6 +48,10 @@ pub fn handle_event(
 pub fn handle_key(key: event::KeyEvent) -> Option<Message> {
     match key.code {
         KeyCode::Char('q') => Some(Message::Quit),
+        KeyCode::Esc => Some(Message::Back),
+
+        KeyCode::Char('n') => Some(Message::New),
+
         KeyCode::Char('a') => Some(Message::ManageAccounts),
         _ => None,
     }
