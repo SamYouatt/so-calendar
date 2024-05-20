@@ -11,13 +11,21 @@ pub struct Model {
 #[derive(Debug, PartialEq, Eq)]
 pub enum CurrentState {
     MonthView,
-    AccountView,
-    // The app should close
+
+    Account,
+    SignUpOptions,
+    PendingLogin,
+
     Done,
 }
 
 #[derive(Debug)]
 pub enum Message {
-    OpenAccountView,
+    ManageAccounts,
+    LoginStarted,
+    LoginSuccess,
+
+    New,
+    Back,
     Quit,
 }

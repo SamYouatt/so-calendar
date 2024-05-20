@@ -6,10 +6,12 @@ use super::model::CurrentState;
 use super::model::Model;
 
 pub fn view(model: &Model, frame: &mut Frame) {
-    match model.running_state {
-        CurrentState::MonthView => features::month_overview::view::render(frame),
-        CurrentState::AccountView => features::account_overview::view::render(frame),
+    match model.current_state {
         CurrentState::Done => {}
+        CurrentState::MonthView => features::month_overview::view::render(frame),
+        CurrentState::Account => features::account_overview::view::render(frame, &model.application),
+        CurrentState::SignUpOptions => todo!(),
+        CurrentState::PendingLogin => todo!(),
     };
 
 }
