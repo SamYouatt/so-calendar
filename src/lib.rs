@@ -10,8 +10,8 @@ pub mod configuration;
 mod features;
 mod tui;
 
-pub async fn run(_application: Application) -> Result<()> {
-    tui::run_tui().await
+pub async fn run(application: Application) -> Result<()> {
+    tui::run_tui(application).await
 
     // let args = SoCalArgs::parse();
 

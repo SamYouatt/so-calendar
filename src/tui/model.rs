@@ -1,7 +1,10 @@
+use crate::configuration::Application;
+
 use super::MessageSender;
 
 pub struct Model {
-    pub running_state: CurrentState,
+    pub application: Application,
+    pub current_state: CurrentState,
     pub message_sender: MessageSender,
 }
 

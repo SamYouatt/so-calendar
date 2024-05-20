@@ -6,6 +6,8 @@ use tokio::sync::mpsc;
 use color_eyre::eyre::Result;
 use tokio_util::sync::CancellationToken;
 
+use crate::configuration::Application;
+
 use self::model::{CurrentState, Message, Model};
 use self::handle_event::handle_event;
 use self::update::update;
@@ -31,12 +33,13 @@ pub fn restore_terminal() -> Result<()> {
     Ok(())
 }
 
-pub async fn run_tui() -> Result<()> {
+pub async fn run_tui(application: Application) -> Result<()> {
     let (message_sender, mut message_receiver) = mpsc::unbounded_channel();
 
     let mut terminal = init_terminal()?;
     let mut model = Model {
-        running_state: CurrentState::MonthView,
+        application,
+        current_state: CurrentState::MonthView,
         message_sender,
     };
 
@@ -56,7 +59,7 @@ pub async fn run_tui() -> Result<()> {
             current_msg = update(&mut model, current_msg.unwrap());
         }
 
-        if model.running_state == CurrentState::Done {
+        if model.current_state == CurrentState::Done {
             break;
         }
     }

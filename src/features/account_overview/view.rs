@@ -3,12 +3,22 @@ use ratatui::symbols::border;
 use ratatui::widgets::block::Title;
 use ratatui::widgets::*;
 
-pub fn render(frame: &mut Frame) {
+use crate::configuration::Application;
+
+use super::retrieve_accounts::retrieve_accounts;
+
+pub fn render(frame: &mut Frame, application: &Application) {
+    let accounts = retrieve_accounts(application).unwrap();
+
     let main_block = Block::bordered()
         .border_set(border::THICK)
         .title(Title::from("Accounts").alignment(Alignment::Center));
 
-    let placeholder = Paragraph::new("Accounts").block(main_block);
+    let account_list = List::new(accounts.iter().map(|acc| acc.email.to_string()))
+        .block(main_block)
+        .highlight_style(Style::default().add_modifier(Modifier::ITALIC))
+        .highlight_symbol(">>")
+        .direction(ListDirection::TopToBottom);
 
-    frame.render_widget(placeholder, frame.size());
+    frame.render_widget(account_list, frame.size());
 }
