@@ -4,8 +4,8 @@ use std::fmt::Display;
 
 use crate::configuration::Application;
 
-struct Account {
-    email: String,
+pub struct Account {
+    pub email: String,
 }
 
 impl Display for Account {
@@ -14,7 +14,7 @@ impl Display for Account {
     }
 }
 
-pub fn handle_list_accounts(application: &Application) -> Result<()> {
+pub fn retrieve_accounts(application: &Application) -> Result<Vec<Account>> {
     let mut statement = application
         .db
         .prepare("SELECT email FROM accounts")
@@ -25,14 +25,5 @@ pub fn handle_list_accounts(application: &Application) -> Result<()> {
         .wrap_err("Failed to read accounts")?
         .collect::<Result<Vec<_>, _>>()?;
 
-    if accounts.is_empty() {
-        println!("No accounts connected...\n");
-        println!("To link an account run: `socal account new`");
-    }
-
-    for account in accounts {
-        println!("{}", account);
-    }
-
-    Ok(())
+    Ok(accounts)
 }
