@@ -16,11 +16,14 @@ pub enum CurrentState {
     Done,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum Message {
     ManageAccounts,
     LoginStarted,
     LoginSuccess,
+
+    Down,
+    Up,
 
     New,
     Back,

@@ -50,6 +50,9 @@ pub fn handle_key(key: event::KeyEvent) -> Option<Message> {
         KeyCode::Char('q') => Some(Message::Quit),
         KeyCode::Esc => Some(Message::Back),
 
+        KeyCode::Down => Some(Message::Down),
+        KeyCode::Up => Some(Message::Up),
+
         KeyCode::Char('n') => Some(Message::New),
 
         KeyCode::Char('a') => Some(Message::ManageAccounts),
