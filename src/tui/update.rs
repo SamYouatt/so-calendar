@@ -1,8 +1,9 @@
 use crate::features;
+use color_eyre::eyre::Result;
 
 use super::model::{CurrentState, Message, Model};
 
-pub fn update(model: &mut Model, msg: Message) -> Option<Message> {
+pub fn update(model: &mut Model, msg: Message) -> Result<Option<Message>> {
     // Handle any universal actions
     match msg {
         Message::ManageAccounts => model.current_state = CurrentState::Account,
@@ -16,10 +17,10 @@ pub fn update(model: &mut Model, msg: Message) -> Option<Message> {
             model.current_state = CurrentState::SignUpOptions(0)
         }
         CurrentState::SignUpOptions(list_state) => {
-            features::new_account::handle_event::handle_event(model, msg, list_state)
+            features::new_account::handle_event::handle_event(model, msg, list_state)?
         }
         _ => {}
     }
 
-    None
+    Ok(None)
 }

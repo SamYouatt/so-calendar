@@ -52,6 +52,7 @@ pub fn handle_key(key: event::KeyEvent) -> Option<Message> {
 
         KeyCode::Down => Some(Message::Down),
         KeyCode::Up => Some(Message::Up),
+        KeyCode::Enter => Some(Message::Enter),
 
         KeyCode::Char('n') => Some(Message::New),
 

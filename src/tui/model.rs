@@ -24,6 +24,7 @@ pub enum Message {
 
     Down,
     Up,
+    Enter,
 
     New,
     Back,

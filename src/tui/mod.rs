@@ -56,7 +56,7 @@ pub async fn run_tui(application: Application) -> Result<()> {
         let mut current_msg = message_receiver.recv().await;
 
         while current_msg.is_some() {
-            current_msg = update(&mut model, current_msg.unwrap());
+            current_msg = update(&mut model, current_msg.unwrap())?;
         }
 
         if model.current_state == CurrentState::Done {
