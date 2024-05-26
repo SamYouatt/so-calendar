@@ -1,11 +1,12 @@
 use crate::configuration::Application;
 
-use super::MessageSender;
+use super::{task_manager::TaskManager, MessageSender};
 
-pub struct Model {
+pub struct Model<'a> {
     pub application: Application,
     pub current_state: CurrentState,
     pub message_channel: MessageSender,
+    pub task_manager: &'a mut TaskManager,
 }
 
 #[derive(Debug, PartialEq, Eq)]
