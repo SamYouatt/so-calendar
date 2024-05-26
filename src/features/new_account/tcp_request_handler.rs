@@ -9,7 +9,8 @@ use chrono::Utc;
 use color_eyre::eyre::Result;
 use eyre::eyre;
 use oauth2::{
-    basic::BasicClient, reqwest::http_client, AuthorizationCode, PkceCodeVerifier, TokenResponse,
+    basic::BasicClient, reqwest::async_http_client, AuthorizationCode, PkceCodeVerifier,
+    TokenResponse,
 };
 use url::Url;
 
@@ -53,17 +54,19 @@ pub async fn handle_tcp_request(
     let auth_token = oauth_client
         .exchange_code(auth_code)
         .set_pkce_verifier(pkce_verifier)
-        .request(http_client)?;
+        .request_async(async_http_client)
+        .await?;
 
     let access_token = auth_token.access_token().secret().to_string();
 
-    let client = reqwest::blocking::Client::new();
+    let client = reqwest::Client::new();
     let profile = client
         .get("https://openidconnect.googleapis.com/v1/userinfo")
         .bearer_auth(&access_token)
-        .send()?;
+        .send()
+        .await?;
 
-    let profile = profile.json::<UserProfile>()?;
+    let profile = profile.json::<UserProfile>().await?;
 
     let account = Account {
         access_token,

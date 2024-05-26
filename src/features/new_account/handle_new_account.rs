@@ -29,23 +29,10 @@ pub struct UserProfile {
 }
 
 pub async fn handle_new_account(
-    application: &Application,
+    application: Application,
     message_channel: MessageSender,
     pkce_verifier: PkceCodeVerifier,
 ) -> Result<()> {
-    let (pkce_challenge, pkce_verifier) = PkceCodeChallenge::new_random_sha256();
-
-    let (auth_url, _) = application
-        .oauth_client
-        .authorize_url(CsrfToken::new_random)
-        .add_scope(Scope::new("openid".into()))
-        .add_scope(Scope::new("email".into()))
-        .add_scope(Scope::new(
-            "https://www.googleapis.com/auth/calendar".into(),
-        ))
-        .set_pkce_challenge(pkce_challenge)
-        .url();
-
     let address = "localhost:42069";
     let listener = TcpListener::bind(address).expect("Failed to bind tcp listener");
 
@@ -57,7 +44,7 @@ pub async fn handle_new_account(
             stream,
             address,
             &application.oauth_client,
-            application,
+            &application,
             pkce_verifier,
         )
         .await?;

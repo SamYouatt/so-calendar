@@ -5,10 +5,11 @@ use ratatui::widgets::*;
 
 use crate::configuration::Application;
 
-use super::retrieve_accounts::retrieve_accounts;
+use super::retrieve_accounts::{retrieve_accounts, Account};
 
-pub async fn render(frame: &mut Frame<'_>, application: &Application) {
-    let accounts = retrieve_accounts(application).await.unwrap();
+pub fn render(frame: &mut Frame<'_>, application: &Application) {
+    // let accounts = retrieve_accounts(application).await.unwrap();
+    let accounts = vec![Account { email: "blah".into() }];
 
     let main_block = Block::bordered()
         .border_set(border::THICK)

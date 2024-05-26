@@ -1,8 +1,10 @@
 use crate::tui::model::{CurrentState, Message, Model};
 use color_eyre::eyre::Result;
 use copypasta::{ClipboardContext, ClipboardProvider};
+use oauth2::{CsrfToken, PkceCodeChallenge, Scope};
 use thiserror::Error;
-use url::Url;
+
+use super::handle_new_account::handle_new_account;
 
 #[derive(Debug, Error)]
 enum InteractionError {
@@ -14,9 +16,13 @@ enum InteractionError {
     UnexpectedError(#[from] eyre::Error),
 }
 
-pub fn handle_list_interaction(model: &mut Model, msg: Message, selected_index: usize) -> Result<()> {
+pub fn handle_list_interaction(
+    model: &mut Model,
+    msg: Message,
+    selected_index: usize,
+) -> Result<()> {
     if msg == Message::Enter {
-        item_selected(selected_index)?;
+        item_selected(selected_index, model)?;
     };
 
     let selection = match msg {
@@ -42,8 +48,19 @@ pub fn handle_list_interaction(model: &mut Model, msg: Message, selected_index: 
     Ok(())
 }
 
-fn item_selected(selected_index: usize) -> Result<()> {
-    let auth_url = Url::parse("https://www.google.com").unwrap();
+fn item_selected(selected_index: usize, model: &Model) -> Result<()> {
+    let (pkce_challenge, pkce_verifier) = PkceCodeChallenge::new_random_sha256();
+    let (auth_url, _) = model
+        .application
+        .oauth_client
+        .authorize_url(CsrfToken::new_random)
+        .add_scope(Scope::new("openid".into()))
+        .add_scope(Scope::new("email".into()))
+        .add_scope(Scope::new(
+            "https://www.googleapis.com/auth/calendar".into(),
+        ))
+        .set_pkce_challenge(pkce_challenge)
+        .url();
 
     match selected_index {
         0 => open::that(auth_url.as_str())?,
@@ -56,6 +73,16 @@ fn item_selected(selected_index: usize) -> Result<()> {
         }
     }
 
-    // tcp handling stuff
-    todo!()
+    let application = model.application.clone();
+    let message_channel = model.message_channel.clone();
+
+    tokio::spawn(async move {
+        handle_new_account(
+            application,
+            message_channel,
+            pkce_verifier,
+        ).await
+    });
+
+    Ok(())
 }
