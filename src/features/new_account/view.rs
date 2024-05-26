@@ -5,7 +5,7 @@ use ratatui::layout::Flex;
 use ratatui::prelude::*;
 use ratatui::widgets::*;
 
-pub fn render(frame: &mut Frame, application: &Application, selected_index: usize) {
+pub fn render_sign_in_options(frame: &mut Frame, application: &Application, selected_index: usize) {
     // Need to render the account page first to render selections as popup over them
     crate::features::account_overview::view::render(frame, application);
 

@@ -13,7 +13,7 @@ pub fn view(model: &Model, frame: &mut Frame) {
             features::account_overview::view::render(frame, &model.application)
         }
         CurrentState::SignUpOptions(selected_index) => {
-            features::new_account::view::render(frame, &model.application, selected_index)
+            features::new_account::view::render_sign_in_options(frame, &model.application, selected_index)
         }
         CurrentState::PendingLogin => todo!(),
     };
