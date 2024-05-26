@@ -1,19 +1,20 @@
 use color_eyre::eyre::Result;
 use eyre::Context;
+use sqlx::{query, SqlitePool};
 use std::{fs, path::PathBuf};
 
 use oauth2::{basic::BasicClient, AuthUrl, ClientId, ClientSecret, RedirectUrl, TokenUrl};
-use rusqlite::Connection;
 
+#[derive(Clone)]
 pub struct Application {
     pub data_dir: PathBuf,
     pub db_path: PathBuf,
     pub oauth_client: BasicClient,
-    pub db: Connection,
+    pub db: SqlitePool,
 }
 
 impl Application {
-    pub fn setup() -> Result<Self> {
+    pub async fn setup() -> Result<Self> {
         let data_dir = dirs_next::data_dir()
             .expect("Unable to find data directory")
             .join("so-calendar");
@@ -22,7 +23,7 @@ impl Application {
         let db_path = data_dir.join("app.sqlite");
 
         let oauth_client = configure_oauth_client()?;
-        let db = setup_database(&db_path)?;
+        let db = setup_database(&db_path).await?;
 
         Ok(Self {
             data_dir,
@@ -56,19 +57,22 @@ fn configure_oauth_client() -> Result<BasicClient> {
     ))
 }
 
-fn setup_database(db_path: &PathBuf) -> Result<Connection> {
-    let db = Connection::open(db_path).wrap_err("Failed to connect to sqlite database")?;
+async fn setup_database(db_path: &PathBuf) -> Result<SqlitePool> {
+    let db = SqlitePool::connect(db_path.to_str().expect("No db path found"))
+        .await
+        .wrap_err("Failed to connect to sqlite database")?;
 
-    db.execute(
+    query!(
         "CREATE TABLE IF NOT EXISTS accounts(
                     id integer PRIMARY KEY,
                     email text NOT NULL UNIQUE,
                     access_token text NOT NULL,
                     refresh_token text NOT NULL,
                     expires_at text NOT NULL
-                )",
-        [],
+                )"
     )
+    .execute(&db)
+    .await
     .wrap_err("Failed to set up accounts table")?;
 
     Ok(db)

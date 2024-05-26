@@ -19,7 +19,7 @@ async fn main() -> Result<()> {
     install_panic_hook();
     color_eyre::install()?;
 
-    let application = Application::setup()?;
+    let application = Application::setup().await?;
 
     run(application).await?;
 

@@ -7,8 +7,8 @@ use crate::configuration::Application;
 
 use super::retrieve_accounts::retrieve_accounts;
 
-pub fn render(frame: &mut Frame, application: &Application) {
-    let accounts = retrieve_accounts(application).unwrap();
+pub async fn render(frame: &mut Frame<'_>, application: &Application) {
+    let accounts = retrieve_accounts(application).await.unwrap();
 
     let main_block = Block::bordered()
         .border_set(border::THICK)

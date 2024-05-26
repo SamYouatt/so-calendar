@@ -20,7 +20,7 @@ use super::{
     store_account::store_account,
 };
 
-pub fn handle_tcp_request(
+pub async fn handle_tcp_request(
     mut stream: TcpStream,
     address: &str,
     oauth_client: &BasicClient,
@@ -76,7 +76,7 @@ pub fn handle_tcp_request(
         expiry: Utc::now() + auth_token.expires_in().unwrap_or(Duration::from_secs(3600)),
     };
 
-    store_account(account, application)?;
+    store_account(account, application).await?;
 
     Ok(())
 }
