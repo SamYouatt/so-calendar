@@ -5,7 +5,7 @@ use ratatui::layout::Flex;
 use ratatui::prelude::*;
 use ratatui::widgets::*;
 
-pub fn render(frame: &mut Frame, application: &Application) {
+pub fn render(frame: &mut Frame, application: &Application, selected_index: usize) {
     // Need to render the account page first to render selections as popup over them
     crate::features::account_overview::view::render(frame, application);
 
@@ -30,7 +30,10 @@ pub fn render(frame: &mut Frame, application: &Application) {
         .highlight_spacing(HighlightSpacing::Always)
         .direction(ListDirection::TopToBottom);
 
+    let mut list_state = ListState::default();
+    list_state.select(Some(selected_index));
+
     frame.render_widget(options_block, centered_rect);
     frame.render_widget(title, options_layout[0]);
-    frame.render_widget(list, options_layout[1]);
+    frame.render_stateful_widget(list, options_layout[1], &mut list_state);
 }

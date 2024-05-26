@@ -10,7 +10,7 @@ pub enum CurrentState {
     MonthView,
 
     Account,
-    SignUpOptions,
+    SignUpOptions(usize),
     PendingLogin,
 
     Done,
