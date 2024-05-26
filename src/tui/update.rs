@@ -17,7 +17,7 @@ pub fn update(model: &mut Model, msg: Message) -> Result<Option<Message>> {
             model.current_state = CurrentState::SignUpOptions(0)
         }
         CurrentState::SignUpOptions(list_state) => {
-            features::new_account::handle_event::handle_event(model, msg, list_state)?
+            features::new_account::handle_event::handle_list_interaction(model, msg, list_state)?
         }
         _ => {}
     }

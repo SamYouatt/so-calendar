@@ -1,8 +1,8 @@
 use crate::tui::model::{CurrentState, Message, Model};
 use color_eyre::eyre::Result;
 use copypasta::{ClipboardContext, ClipboardProvider};
-use url::Url;
 use thiserror::Error;
+use url::Url;
 
 #[derive(Debug, Error)]
 enum InteractionError {
@@ -14,23 +14,9 @@ enum InteractionError {
     UnexpectedError(#[from] eyre::Error),
 }
 
-pub fn handle_event(model: &mut Model, msg: Message, selected_index: usize) -> Result<()> {
-    let auth_url = Url::parse("https://www.google.com").unwrap();
-
+pub fn handle_list_interaction(model: &mut Model, msg: Message, selected_index: usize) -> Result<()> {
     if msg == Message::Enter {
-        match selected_index {
-            0 => open::that(auth_url.as_str())?,
-            _ => {
-                let mut clipboard = ClipboardContext::new()
-                    .map_err(|e| InteractionError::FailedCopyToClipboard(e.to_string()))?;
-                clipboard
-                    .set_contents(auth_url.into())
-                    .map_err(|e| InteractionError::FailedCopyToClipboard(e.to_string()))?;
-            }
-        }
-
-        // tcp handling stuff
-        todo!()
+        item_selected(selected_index)?;
     };
 
     let selection = match msg {
@@ -54,4 +40,22 @@ pub fn handle_event(model: &mut Model, msg: Message, selected_index: usize) -> R
     model.current_state = CurrentState::SignUpOptions(selection);
 
     Ok(())
+}
+
+fn item_selected(selected_index: usize) -> Result<()> {
+    let auth_url = Url::parse("https://www.google.com").unwrap();
+
+    match selected_index {
+        0 => open::that(auth_url.as_str())?,
+        _ => {
+            let mut clipboard = ClipboardContext::new()
+                .map_err(|e| InteractionError::FailedCopyToClipboard(e.to_string()))?;
+            clipboard
+                .set_contents(auth_url.into())
+                .map_err(|e| InteractionError::FailedCopyToClipboard(e.to_string()))?;
+        }
+    }
+
+    // tcp handling stuff
+    todo!()
 }
