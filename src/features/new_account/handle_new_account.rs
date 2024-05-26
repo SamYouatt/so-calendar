@@ -5,12 +5,16 @@ use color_eyre::eyre::Result;
 use copypasta::{ClipboardContext, ClipboardProvider};
 use crossterm::event::{self, Event, KeyCode, KeyEventKind};
 use eyre::Context;
-use oauth2::{CsrfToken, PkceCodeChallenge, Scope};
+use oauth2::{CsrfToken, PkceCodeChallenge, PkceCodeVerifier, Scope};
 use serde::Deserialize;
 use thiserror::Error;
 use url::Url;
 
-use crate::{features::new_account::tcp_request_handler::handle_tcp_request, Application};
+use crate::{
+    features::new_account::tcp_request_handler::handle_tcp_request,
+    tui::{model::Message, MessageSender},
+    Application,
+};
 
 pub struct Account {
     pub access_token: String,
@@ -24,7 +28,11 @@ pub struct UserProfile {
     pub email: String,
 }
 
-pub fn handle_new_account(application: &Application) -> Result<()> {
+pub async fn handle_new_account(
+    application: &Application,
+    message_channel: MessageSender,
+    pkce_verifier: PkceCodeVerifier,
+) -> Result<()> {
     let (pkce_challenge, pkce_verifier) = PkceCodeChallenge::new_random_sha256();
 
     let (auth_url, _) = application
@@ -51,7 +59,12 @@ pub fn handle_new_account(application: &Application) -> Result<()> {
             &application.oauth_client,
             application,
             pkce_verifier,
-        )?;
+        )
+        .await?;
+
+        message_channel
+            .send(Message::LoginSuccess)
+            .expect("Message channel should not be closed");
 
         break;
     }
