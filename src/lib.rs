@@ -3,7 +3,7 @@ use clap::Parser;
 use color_eyre::eyre::Result;
 use configuration::Application;
 
-use crate::features::new_account::handle_new_account::handle_new_account;
+use crate::features::new_account::handle_new_account::account_signin_task;
 
 mod args;
 pub mod configuration;

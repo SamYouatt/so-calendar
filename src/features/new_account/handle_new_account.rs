@@ -1,4 +1,4 @@
-use std::net::TcpListener;
+use std::{io, net::TcpListener, thread, time::Duration};
 
 use chrono::{DateTime, Utc};
 use color_eyre::eyre::Result;
@@ -8,6 +8,7 @@ use eyre::Context;
 use oauth2::{CsrfToken, PkceCodeChallenge, PkceCodeVerifier, Scope};
 use serde::Deserialize;
 use thiserror::Error;
+use tokio_util::sync::CancellationToken;
 use url::Url;
 
 use crate::{
@@ -28,32 +29,45 @@ pub struct UserProfile {
     pub email: String,
 }
 
-pub async fn handle_new_account(
+pub async fn account_signin_task(
     application: Application,
     message_channel: MessageSender,
     pkce_verifier: PkceCodeVerifier,
+    cancellation_token: CancellationToken,
 ) -> Result<()> {
     let address = "localhost:42069";
     let listener = TcpListener::bind(address).expect("Failed to bind tcp listener");
+    listener
+        .set_nonblocking(true)
+        .expect("Unable to set listener to non-blocking");
 
-    for stream in listener.incoming() {
-        let stream = stream.wrap_err("Error accepting tcp connection")?;
+    loop {
+        if cancellation_token.is_cancelled() {
+            return Ok(());
+        }
 
-        // TODO: handle errors and exit
-        handle_tcp_request(
-            stream,
-            address,
-            &application.oauth_client,
-            &application,
-            pkce_verifier,
-        )
-        .await?;
+        match listener.accept() {
+            Ok((stream, _)) => {
+                handle_tcp_request(
+                    stream,
+                    address,
+                    &application.oauth_client,
+                    &application,
+                    pkce_verifier,
+                )
+                .await?;
 
-        message_channel
-            .send(Message::LoginSuccess)
-            .expect("Message channel should not be closed");
+                message_channel
+                    .send(Message::LoginSuccess)
+                    .expect("Message channel should not be closed");
 
-        break;
+                break;
+            }
+            Err(e) if e.kind() == io::ErrorKind::WouldBlock => {
+                thread::sleep(Duration::from_millis(100));
+            }
+            Err(e) => return Err(e.into()),
+        }
     }
 
     Ok(())

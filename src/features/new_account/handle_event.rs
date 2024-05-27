@@ -3,8 +3,9 @@ use color_eyre::eyre::Result;
 use copypasta::{ClipboardContext, ClipboardProvider};
 use oauth2::{CsrfToken, PkceCodeChallenge, Scope};
 use thiserror::Error;
+use tokio_util::sync::CancellationToken;
 
-use super::handle_new_account::handle_new_account;
+use super::handle_new_account::account_signin_task;
 
 #[derive(Debug, Error)]
 enum InteractionError {
@@ -79,8 +80,10 @@ fn item_selected(selected_index: usize, model: &Model) -> Result<()> {
         .send(Message::LoginStarted)
         .expect("Message channel should not be closed");
 
+    let cancellation_token = CancellationToken::new();
+
     tokio::spawn(
-        async move { handle_new_account(application, message_channel, pkce_verifier).await },
+        async move { account_signin_task(application, message_channel, pkce_verifier, cancellation_token).await },
     );
 
     Ok(())
