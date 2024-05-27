@@ -5,6 +5,7 @@ use std::fmt::Display;
 
 use crate::configuration::Application;
 
+#[derive(Debug)]
 pub struct Account {
     pub email: String,
 }

@@ -1,6 +1,6 @@
 use tokio_util::sync::CancellationToken;
 
-use crate::configuration::Application;
+use crate::{configuration::Application, features::account_overview::retrieve_accounts::Account};
 
 use super::MessageSender;
 
@@ -14,7 +14,7 @@ pub struct Model {
 pub enum CurrentState {
     MonthView,
 
-    Account,
+    Account(Vec<Account>),
     SignUpOptions(usize),
     PendingLogin(CancellationToken),
 

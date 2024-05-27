@@ -5,12 +5,9 @@ use ratatui::widgets::*;
 
 use crate::configuration::Application;
 
-use super::retrieve_accounts::{retrieve_accounts, Account};
+use super::retrieve_accounts::Account;
 
-pub fn render(frame: &mut Frame<'_>, application: &Application) {
-    // let accounts = retrieve_accounts(application).await.unwrap();
-    let accounts = vec![Account { email: "blah".into() }];
-
+pub fn render(accounts: &[Account], frame: &mut Frame<'_>, application: &Application) {
     let main_block = Block::bordered()
         .border_set(border::THICK)
         .title(Title::from("Accounts").alignment(Alignment::Center));
