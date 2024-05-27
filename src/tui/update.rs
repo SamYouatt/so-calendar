@@ -8,6 +8,8 @@ pub async fn update(model: &mut Model, msg: Message) -> Result<Option<Message>> 
     match msg {
         Message::Quit => graceful_shutdown(model),
 
+        Message::Back => return handle_back_navigation(model),
+
         Message::ManageAccounts => features::account_overview::handle_accounts_overview(model).await,
         Message::LoginStarted(ref cancellation_token) => {
             model.current_state = CurrentState::PendingLogin(cancellation_token.clone())
@@ -39,4 +41,18 @@ fn graceful_shutdown(model: &mut Model) {
     };
 
     model.current_state = CurrentState::Done;
+}
+
+fn handle_back_navigation(model: &mut Model) -> Result<Option<Message>> {
+    match &model.current_state {
+        CurrentState::Account(_) => model.current_state = CurrentState::DaysView,
+        CurrentState::SignUpOptions(_) => return Ok(Some(Message::ManageAccounts)),
+        CurrentState::PendingLogin(cancellation_token) => {
+            cancellation_token.cancel();
+            return Ok(Some(Message::ManageAccounts));
+        },
+        _ => {},
+    };
+
+    Ok(None)
 }
