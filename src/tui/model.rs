@@ -12,6 +12,7 @@ pub struct Model {
 
 #[derive(Debug)]
 pub enum CurrentState {
+    DaysView,
     MonthView,
 
     Account(Vec<Account>),
