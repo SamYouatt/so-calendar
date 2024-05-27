@@ -1,3 +1,5 @@
+use tokio_util::sync::CancellationToken;
+
 use crate::configuration::Application;
 
 use super::MessageSender;
@@ -19,10 +21,10 @@ pub enum CurrentState {
     Done,
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug)]
 pub enum Message {
     ManageAccounts,
-    LoginStarted,
+    LoginStarted(CancellationToken),
     LoginSuccess,
 
     Down,

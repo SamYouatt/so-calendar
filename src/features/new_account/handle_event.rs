@@ -22,7 +22,7 @@ pub fn handle_list_interaction(
     msg: Message,
     selected_index: usize,
 ) -> Result<()> {
-    if msg == Message::Enter {
+    if matches!(msg, Message::Enter) {
         item_selected(selected_index, model)?;
     };
 
@@ -75,13 +75,14 @@ fn item_selected(selected_index: usize, model: &Model) -> Result<()> {
     }
 
     let application = model.application.clone();
-    let message_channel = model.message_channel.clone();
-    message_channel
-        .send(Message::LoginStarted)
-        .expect("Message channel should not be closed");
 
     let cancellation_token = CancellationToken::new();
+    model.message_channel
+        .send(Message::LoginStarted(cancellation_token.clone()))
+        .expect("Message channel should not be closed");
 
+
+    let message_channel = model.message_channel.clone();
     tokio::spawn(
         async move { account_signin_task(application, message_channel, pkce_verifier, cancellation_token).await },
     );
