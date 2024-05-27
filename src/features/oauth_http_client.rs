@@ -5,9 +5,10 @@ use reqwest::RequestBuilder;
 use sqlx::{query, SqlitePool};
 use thiserror::Error;
 
-pub struct GoogleOAuthClient<'a> {
-    db: &'a SqlitePool,
-    oauth_client: &'a BasicClient,
+#[derive(Clone)]
+pub struct GoogleOAuthClient {
+    db: SqlitePool,
+    oauth_client: BasicClient,
 }
 
 #[derive(Error, Debug)]
@@ -30,8 +31,8 @@ struct StoredTokenDetails {
     expires_at: DateTime<Utc>,
 }
 
-impl<'a> GoogleOAuthClient<'a> {
-    pub fn new(db: &'a SqlitePool, oauth_client: &'a BasicClient) -> Self {
+impl GoogleOAuthClient {
+    pub fn new(db: SqlitePool, oauth_client: BasicClient) -> Self {
         GoogleOAuthClient { db, oauth_client }
     }
 
@@ -44,7 +45,7 @@ impl<'a> GoogleOAuthClient<'a> {
             "SELECT access_token, refresh_token, expires_at FROM accounts WHERE email = $1 LIMIT 1",
             account_email
         )
-        .fetch_one(self.db)
+        .fetch_one(&self.db)
         .await
         {
             Ok(row) => {

@@ -5,12 +5,15 @@ use std::{fs, path::PathBuf};
 
 use oauth2::{basic::BasicClient, AuthUrl, ClientId, ClientSecret, RedirectUrl, TokenUrl};
 
+use crate::features::oauth_http_client::GoogleOAuthClient;
+
 #[derive(Clone)]
 pub struct Application {
     pub data_dir: PathBuf,
     pub db_path: PathBuf,
     pub oauth_client: BasicClient,
     pub db: SqlitePool,
+    pub google_client: GoogleOAuthClient,
 }
 
 impl Application {
@@ -25,11 +28,14 @@ impl Application {
         let oauth_client = configure_oauth_client()?;
         let db = setup_database(&db_path).await?;
 
+        let google_client = GoogleOAuthClient::new(db.clone() ,oauth_client.clone());
+
         Ok(Self {
             data_dir,
             db_path,
             oauth_client,
             db,
+            google_client,
         })
     }
 }
