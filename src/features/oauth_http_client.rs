@@ -1,7 +1,7 @@
 use chrono::{DateTime, Duration, Utc};
 use eyre::Context;
 use oauth2::{basic::BasicClient, reqwest::http_client, RefreshToken, TokenResponse};
-use reqwest::blocking::RequestBuilder;
+use reqwest::RequestBuilder;
 use sqlx::{query, SqlitePool};
 use thiserror::Error;
 
@@ -39,7 +39,7 @@ impl<'a> GoogleOAuthClient<'a> {
         &self,
         account_email: String,
         request_builder: RequestBuilder,
-    ) -> Result<reqwest::blocking::Response, OAuthHttpClientError> {
+    ) -> Result<reqwest::Response, OAuthHttpClientError> {
         let token_details = match query!(
             "SELECT access_token, refresh_token, expires_at FROM accounts WHERE email = $1 LIMIT 1",
             account_email
@@ -90,7 +90,7 @@ impl<'a> GoogleOAuthClient<'a> {
 
         // Step 4: store the new access token and expiration date if there was one
 
-        let result = request_builder.bearer_auth(access_token).send()?;
+        let result = request_builder.bearer_auth(access_token).send().await?;
         Ok(result)
     }
 }
