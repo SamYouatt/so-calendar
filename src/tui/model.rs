@@ -19,6 +19,8 @@ pub enum CurrentState {
     SignUpOptions(usize),
     PendingLogin(CancellationToken),
 
+    Calendars,
+
     Done,
 }
 
@@ -27,6 +29,8 @@ pub enum Message {
     ManageAccounts,
     LoginStarted(CancellationToken),
     LoginSuccess,
+
+    ManageCalendars,
 
     Down,
     Up,
