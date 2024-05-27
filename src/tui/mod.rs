@@ -60,7 +60,7 @@ pub async fn run_tui(application: Application) -> Result<()> {
             current_msg = update(&mut model, current_msg.unwrap())?;
         }
 
-        if model.current_state == CurrentState::Done {
+        if matches!(model.current_state, CurrentState::Done) {
             break;
         }
     }

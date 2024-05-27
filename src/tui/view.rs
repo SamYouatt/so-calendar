@@ -19,7 +19,7 @@ pub fn view(model: &Model, frame: &mut Frame) {
                 selected_index,
             )
         }
-        CurrentState::PendingLogin => {
+        CurrentState::PendingLogin(_) => {
             features::new_account::view::render_waiting_for_signin(frame, &model.application)
         }
     };

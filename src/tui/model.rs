@@ -10,13 +10,13 @@ pub struct Model {
     pub message_channel: MessageSender,
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug)]
 pub enum CurrentState {
     MonthView,
 
     Account,
     SignUpOptions(usize),
-    PendingLogin,
+    PendingLogin(CancellationToken),
 
     Done,
 }
