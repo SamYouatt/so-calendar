@@ -6,8 +6,10 @@ use super::model::{CurrentState, Message, Model};
 pub fn update(model: &mut Model, msg: Message) -> Result<Option<Message>> {
     // Handle any universal actions
     match msg {
-        Message::ManageAccounts => model.current_state = CurrentState::Account,
         Message::Quit => model.current_state = CurrentState::Done,
+        Message::ManageAccounts => model.current_state = CurrentState::Account,
+        Message::LoginStarted => model.current_state = CurrentState::PendingLogin,
+        Message::LoginSuccess => model.current_state = CurrentState::Account,
         _ => {}
     };
 

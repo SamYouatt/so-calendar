@@ -75,14 +75,13 @@ fn item_selected(selected_index: usize, model: &Model) -> Result<()> {
 
     let application = model.application.clone();
     let message_channel = model.message_channel.clone();
+    message_channel
+        .send(Message::LoginStarted)
+        .expect("Message channel should not be closed");
 
-    tokio::spawn(async move {
-        handle_new_account(
-            application,
-            message_channel,
-            pkce_verifier,
-        ).await
-    });
+    tokio::spawn(
+        async move { handle_new_account(application, message_channel, pkce_verifier).await },
+    );
 
     Ok(())
 }
