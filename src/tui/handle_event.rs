@@ -4,11 +4,12 @@ use crossterm::event::{self, Event, KeyCode};
 use tokio_util::sync::CancellationToken;
 
 use super::{
-    model::Message,
+    model::{Message, Model},
     MessageSender,
 };
 
 pub fn handle_event(
+    _model: &Model,
     message_sender: MessageSender,
     cancellation_token: CancellationToken,
 ) -> tokio::task::JoinHandle<()> {
