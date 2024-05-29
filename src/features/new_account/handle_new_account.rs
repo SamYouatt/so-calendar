@@ -2,14 +2,9 @@ use std::{io, net::TcpListener, thread, time::Duration};
 
 use chrono::{DateTime, Utc};
 use color_eyre::eyre::Result;
-use copypasta::{ClipboardContext, ClipboardProvider};
-use crossterm::event::{self, Event, KeyCode, KeyEventKind};
-use eyre::Context;
-use oauth2::{CsrfToken, PkceCodeChallenge, PkceCodeVerifier, Scope};
+use oauth2::PkceCodeVerifier;
 use serde::Deserialize;
-use thiserror::Error;
 use tokio_util::sync::CancellationToken;
-use url::Url;
 
 use crate::{
     features::new_account::tcp_request_handler::handle_tcp_request,
@@ -71,14 +66,4 @@ pub async fn account_signin_task(
     }
 
     Ok(())
-}
-
-#[derive(Debug, Error)]
-enum InteractionError {
-    #[error("Failed to open browser")]
-    FailedOpeningBrowser(#[from] std::io::Error),
-    #[error("Failed to copy to system clipboard: {0}")]
-    FailedCopyToClipboard(String),
-    #[error("Unexpected error during interactive terminal")]
-    UnexpectedError(#[from] eyre::Error),
 }

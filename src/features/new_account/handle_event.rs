@@ -2,20 +2,9 @@ use crate::tui::model::{CurrentState, Message, Model};
 use color_eyre::eyre::Result;
 use copypasta::{ClipboardContext, ClipboardProvider};
 use oauth2::{CsrfToken, PkceCodeChallenge, Scope};
-use thiserror::Error;
 use tokio_util::sync::CancellationToken;
 
-use super::handle_new_account::account_signin_task;
-
-#[derive(Debug, Error)]
-enum InteractionError {
-    #[error("Failed to open browser")]
-    FailedOpeningBrowser(#[from] std::io::Error),
-    #[error("Failed to copy to system clipboard: {0}")]
-    FailedCopyToClipboard(String),
-    #[error("Unexpected error during interactive terminal")]
-    UnexpectedError(#[from] eyre::Error),
-}
+use super::{handle_new_account::account_signin_task, InteractionError};
 
 pub fn handle_list_interaction(
     model: &mut Model,
@@ -77,15 +66,21 @@ fn item_selected(selected_index: usize, model: &Model) -> Result<()> {
     let application = model.application.clone();
 
     let cancellation_token = CancellationToken::new();
-    model.message_channel
+    model
+        .message_channel
         .send(Message::LoginStarted(cancellation_token.clone()))
         .expect("Message channel should not be closed");
 
-
     let message_channel = model.message_channel.clone();
-    tokio::spawn(
-        async move { account_signin_task(application, message_channel, pkce_verifier, cancellation_token).await },
-    );
+    tokio::spawn(async move {
+        account_signin_task(
+            application,
+            message_channel,
+            pkce_verifier,
+            cancellation_token,
+        )
+        .await
+    });
 
     Ok(())
 }
