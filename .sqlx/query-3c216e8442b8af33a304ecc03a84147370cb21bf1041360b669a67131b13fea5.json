@@ -1,0 +1,32 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT access_token, refresh_token, expires_at FROM accounts WHERE email = $1 LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "name": "access_token",
+        "ordinal": 0,
+        "type_info": "Text"
+      },
+      {
+        "name": "refresh_token",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "expires_at",
+        "ordinal": 2,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "3c216e8442b8af33a304ecc03a84147370cb21bf1041360b669a67131b13fea5"
+}

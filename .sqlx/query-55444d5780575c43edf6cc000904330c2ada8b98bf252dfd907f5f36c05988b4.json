@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT email FROM accounts",
+  "describe": {
+    "columns": [
+      {
+        "name": "email",
+        "ordinal": 0,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "55444d5780575c43edf6cc000904330c2ada8b98bf252dfd907f5f36c05988b4"
+}

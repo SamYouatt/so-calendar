@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO accounts (email, access_token, refresh_token, expires_at) VALUES ($1, $2, $3, $4)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": []
+  },
+  "hash": "8b7c42e3d2557ecaec8a2a1ed42546d8231558c32df5a0e84f60bf2882adb2dd"
+}

@@ -1,6 +1,6 @@
 use color_eyre::eyre::Result;
 use eyre::Context;
-use sqlx::{query, SqlitePool};
+use sqlx::{sqlite::SqliteConnectOptions, SqlitePool};
 use std::{fs, path::PathBuf};
 
 use oauth2::{basic::BasicClient, AuthUrl, ClientId, ClientSecret, RedirectUrl, TokenUrl};
@@ -64,22 +64,17 @@ fn configure_oauth_client() -> Result<BasicClient> {
 }
 
 async fn setup_database(db_path: &PathBuf) -> Result<SqlitePool> {
-    let db = SqlitePool::connect(db_path.to_str().expect("No db path found"))
+    let sqlite_options = SqliteConnectOptions::new()
+        .filename(db_path)
+        .create_if_missing(true);
+
+    let db = SqlitePool::connect_with(sqlite_options)
         .await
         .wrap_err("Failed to connect to sqlite database")?;
 
-    query!(
-        "CREATE TABLE IF NOT EXISTS accounts(
-                    id integer PRIMARY KEY,
-                    email text NOT NULL UNIQUE,
-                    access_token text NOT NULL,
-                    refresh_token text NOT NULL,
-                    expires_at text NOT NULL
-                )"
-    )
-    .execute(&db)
-    .await
-    .wrap_err("Failed to set up accounts table")?;
+    sqlx::migrate!("./migrations")
+        .run(&db)
+        .await?;
 
     Ok(db)
 }
