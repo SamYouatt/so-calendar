@@ -27,7 +27,7 @@ pub async fn handle_tcp_request(
     oauth_client: &BasicClient,
     application: &Application,
     pkce_verifier: PkceCodeVerifier,
-) -> Result<()> {
+) -> Result<String> {
     let buf_reader = BufReader::new(&mut stream);
     let request_line = buf_reader
         .lines()
@@ -75,11 +75,11 @@ pub async fn handle_tcp_request(
             .ok_or(eyre!("Expected refresh token but none returned"))?
             .secret()
             .into(),
-        email: profile.email,
+        email: profile.email.clone(),
         expiry: Utc::now() + auth_token.expires_in().unwrap_or(Duration::from_secs(3600)),
     };
 
     store_account(account, application).await?;
 
-    Ok(())
+    Ok(profile.email)
 }

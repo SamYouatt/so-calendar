@@ -12,6 +12,8 @@ use crate::{
     Application,
 };
 
+use super::populate_new_calendars::populate_new_calendars;
+
 pub struct Account {
     pub access_token: String,
     pub refresh_token: String,
@@ -43,7 +45,7 @@ pub async fn account_signin_task(
 
         match listener.accept() {
             Ok((stream, _)) => {
-                handle_tcp_request(
+                let email = handle_tcp_request(
                     stream,
                     address,
                     &application.oauth_client,
@@ -51,6 +53,8 @@ pub async fn account_signin_task(
                     pkce_verifier,
                 )
                 .await?;
+
+                populate_new_calendars(email, &application).await?;
 
                 message_channel
                     .send(Message::LoginSuccess)

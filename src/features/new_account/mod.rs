@@ -1,10 +1,11 @@
 use thiserror::Error;
 
-pub(crate) mod account_signin_task;
-pub(crate) mod store_account;
-pub(crate) mod tcp_request_handler;
-pub(crate) mod view;
+mod account_signin_task;
 pub(crate) mod handle_event;
+mod populate_new_calendars;
+mod store_account;
+mod tcp_request_handler;
+pub(crate) mod view;
 
 #[derive(Debug, Error)]
 enum InteractionError {
