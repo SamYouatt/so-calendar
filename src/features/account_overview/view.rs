@@ -3,11 +3,9 @@ use ratatui::symbols::border;
 use ratatui::widgets::block::Title;
 use ratatui::widgets::*;
 
-use crate::configuration::Application;
-
 use super::retrieve_accounts::Account;
 
-pub fn render(accounts: &[Account], frame: &mut Frame<'_>, application: &Application) {
+pub fn render(accounts: &[Account], frame: &mut Frame<'_>) {
     let main_block = Block::bordered()
         .border_set(border::THICK)
         .title(Title::from("Accounts").alignment(Alignment::Center));

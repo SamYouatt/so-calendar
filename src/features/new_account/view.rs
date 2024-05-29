@@ -1,13 +1,12 @@
-use crate::configuration::Application;
 use crate::tui::util::centered_popup;
 
 use ratatui::layout::Flex;
 use ratatui::prelude::*;
 use ratatui::widgets::*;
 
-pub fn render_sign_in_options(frame: &mut Frame, application: &Application, selected_index: usize) {
+pub fn render_sign_in_options(frame: &mut Frame, selected_index: usize) {
     // Need to render the account page first to render selections as popup over them
-    crate::features::account_overview::view::render(&[], frame, application);
+    crate::features::account_overview::view::render(&[], frame);
 
     let centered_rect = centered_popup(frame.size(), 35, 6);
 
@@ -38,9 +37,9 @@ pub fn render_sign_in_options(frame: &mut Frame, application: &Application, sele
     frame.render_stateful_widget(list, options_layout[1], &mut list_state);
 }
 
-pub fn render_waiting_for_signin(frame: &mut Frame, application: &Application) {
+pub fn render_waiting_for_signin(frame: &mut Frame) {
     // Need to render the account page first to render selections as popup over them
-    crate::features::account_overview::view::render(&[], frame, application);
+    crate::features::account_overview::view::render(&[], frame);
 
     let centered_rect = centered_popup(frame.size(), 35, 6);
 

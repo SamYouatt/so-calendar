@@ -13,17 +13,16 @@ pub fn view(model: &Model, frame: &mut Frame) {
         CurrentState::DaysView => features::days_view::view::render(frame),
 
         CurrentState::Account(accounts) => {
-            features::account_overview::view::render(accounts, frame, &model.application)
+            features::account_overview::view::render(accounts, frame)
         }
         CurrentState::SignUpOptions(selected_index) => {
             features::new_account::view::render_sign_in_options(
                 frame,
-                &model.application,
                 *selected_index,
             )
         }
         CurrentState::PendingLogin(_) => {
-            features::new_account::view::render_waiting_for_signin(frame, &model.application)
+            features::new_account::view::render_waiting_for_signin(frame)
         }
 
         CurrentState::Calendars => todo!(),
