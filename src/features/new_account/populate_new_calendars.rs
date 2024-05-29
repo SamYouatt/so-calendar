@@ -1,5 +1,9 @@
+use eyre::eyre;
 use color_eyre::eyre::Result;
+use futures::future::join_all;
 use serde::Deserialize;
+use sqlx::SqlitePool;
+use uuid::Uuid;
 
 use crate::configuration::Application;
 
@@ -53,9 +57,44 @@ pub async fn populate_new_calendars(email: String, application: &Application) ->
         .map(|cal| Calendar::from(cal))
         .collect();
 
-    store_calendars(&calendars, application).await
+    store_calendars(calendars, application).await
 }
 
-async fn store_calendars(calendars: &[Calendar], application: &Application) -> Result<()> {
-    todo!()
+async fn store_calendars(calendars: Vec<Calendar>, application: &Application) -> Result<()> {
+    let store_row_queries: Vec<_> = calendars
+        .into_iter()
+        .map(|calendar| store_row(calendar, &application.db))
+        .collect();
+
+    let results = join_all(store_row_queries).await;
+
+    if results.iter().any(|res| res.is_err()) {
+        let error_results = results.iter().filter(|res| res.is_err());
+        return Err(eyre!("Error while upserting new calendars: {:?}", error_results));
+    }
+
+    Ok(())
+}
+
+async fn store_row(calendar: Calendar, db: &SqlitePool) -> Result<()> {
+    let id = Uuid::new_v4().to_string();
+
+    let _ = sqlx::query!(
+        "INSERT INTO calendars
+        (id, calendar_id, title, description, primary_calendar)
+        VALUES ($1, $2, $3, $4, $5)
+        ON CONFLICT (calendar_id)
+        DO UPDATE SET title=excluded.title,
+            description=excluded.description,
+            primary_calendar=excluded.primary_calendar",
+        id,
+        calendar.id,
+        calendar.title,
+        calendar.description,
+        calendar.primary_calendar
+    )
+    .execute(db)
+    .await?;
+    
+    Ok(())
 }
