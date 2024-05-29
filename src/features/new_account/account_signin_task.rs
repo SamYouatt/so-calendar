@@ -45,7 +45,7 @@ pub async fn account_signin_task(
 
         match listener.accept() {
             Ok((stream, _)) => {
-                let email = handle_tcp_request(
+                let account_id = handle_tcp_request(
                     stream,
                     address,
                     &application.oauth_client,
@@ -54,7 +54,7 @@ pub async fn account_signin_task(
                 )
                 .await?;
 
-                populate_new_calendars(email, &application).await?;
+                populate_new_calendars(account_id, &application).await?;
 
                 message_channel
                     .send(Message::LoginSuccess)

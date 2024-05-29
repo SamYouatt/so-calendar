@@ -40,14 +40,14 @@ impl From<CalendarResource> for Calendar {
     }
 }
 
-pub async fn populate_new_calendars(email: String, application: &Application) -> Result<()> {
+pub async fn populate_new_calendars(account_id: Uuid, application: &Application) -> Result<()> {
     let http_client = reqwest::Client::new();
     let calendar_list_request =
         http_client.get("https://www.googleapis.com/calendar/v3/users/me/calendarList");
 
     let response = application
         .google_client
-        .send(email, calendar_list_request)
+        .send(account_id, calendar_list_request)
         .await?;
 
     let calendar_list: CalendarListResponse = response.json().await?;

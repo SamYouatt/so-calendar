@@ -13,6 +13,7 @@ use oauth2::{
     TokenResponse,
 };
 use url::Url;
+use uuid::Uuid;
 
 use crate::configuration::Application;
 
@@ -27,7 +28,7 @@ pub async fn handle_tcp_request(
     oauth_client: &BasicClient,
     application: &Application,
     pkce_verifier: PkceCodeVerifier,
-) -> Result<String> {
+) -> Result<Uuid> {
     let buf_reader = BufReader::new(&mut stream);
     let request_line = buf_reader
         .lines()
@@ -79,7 +80,5 @@ pub async fn handle_tcp_request(
         expiry: Utc::now() + auth_token.expires_in().unwrap_or(Duration::from_secs(3600)),
     };
 
-    store_account(account, application).await?;
-
-    Ok(profile.email)
+    store_account(account, application).await
 }
