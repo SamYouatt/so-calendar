@@ -57,13 +57,15 @@ pub async fn populate_new_calendars(account_id: Uuid, application: &Application)
         .map(|cal| Calendar::from(cal))
         .collect();
 
-    store_calendars(calendars, application).await
+    let _ = store_calendars(calendars, account_id, application).await.unwrap();
+
+    Ok(())
 }
 
-async fn store_calendars(calendars: Vec<Calendar>, application: &Application) -> Result<()> {
+async fn store_calendars(calendars: Vec<Calendar>, account_id: Uuid, application: &Application) -> Result<()> {
     let store_row_queries: Vec<_> = calendars
         .into_iter()
-        .map(|calendar| store_row(calendar, &application.db))
+        .map(|calendar| store_row(calendar, account_id, &application.db))
         .collect();
 
     let results = join_all(store_row_queries).await;
@@ -76,19 +78,21 @@ async fn store_calendars(calendars: Vec<Calendar>, application: &Application) ->
     Ok(())
 }
 
-async fn store_row(calendar: Calendar, db: &SqlitePool) -> Result<()> {
+async fn store_row(calendar: Calendar, account_id: Uuid, db: &SqlitePool) -> Result<()> {
     let id = Uuid::new_v4().to_string();
+    let account_id_string = account_id.to_string();
 
     let _ = sqlx::query!(
         "INSERT INTO calendars
-        (id, calendar_id, title, description, primary_calendar)
-        VALUES ($1, $2, $3, $4, $5)
+        (id, calendar_id, account_id, title, description, primary_calendar)
+        VALUES ($1, $2, $3, $4, $5, $6)
         ON CONFLICT (calendar_id)
         DO UPDATE SET title=excluded.title,
             description=excluded.description,
             primary_calendar=excluded.primary_calendar",
         id,
         calendar.id,
+        account_id_string,
         calendar.title,
         calendar.description,
         calendar.primary_calendar
