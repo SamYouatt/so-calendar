@@ -4,7 +4,7 @@ use uuid::Uuid;
 
 use crate::configuration::Application;
 
-use super::handle_new_account::Account;
+use super::account_signin_task::Account;
 
 pub async fn store_account(account: Account, application: &Application) -> Result<()> {
     let expiry_as_string = account.expiry.to_rfc3339();

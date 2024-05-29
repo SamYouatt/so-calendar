@@ -17,7 +17,7 @@ use url::Url;
 use crate::configuration::Application;
 
 use super::{
-    handle_new_account::{Account, UserProfile},
+    account_signin_task::{Account, UserProfile},
     store_account::store_account,
 };
 

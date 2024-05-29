@@ -4,7 +4,7 @@ use copypasta::{ClipboardContext, ClipboardProvider};
 use oauth2::{CsrfToken, PkceCodeChallenge, Scope};
 use tokio_util::sync::CancellationToken;
 
-use super::{handle_new_account::account_signin_task, InteractionError};
+use super::{account_signin_task::account_signin_task, InteractionError};
 
 pub fn handle_list_interaction(
     model: &mut Model,
