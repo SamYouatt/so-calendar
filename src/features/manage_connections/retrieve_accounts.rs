@@ -14,7 +14,7 @@ impl Display for Account {
 }
 
 pub async fn retrieve_accounts(application: &Application) -> Result<Vec<Account>> {
-    let accounts = query_as!(Account, "SELECT email FROM accounts")
+    let accounts = query_as!(Account, r#"SELECT id as "id: uuid::Uuid", email FROM accounts"#)
         .fetch_all(&application.db)
         .await
         .wrap_err("Error while retrieving stored accounts")?;

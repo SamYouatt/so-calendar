@@ -6,6 +6,7 @@ mod retrieve_calendars;
 
 #[derive(Debug)]
 pub struct Account {
+    id: Uuid,
     pub email: String,
 }
 
