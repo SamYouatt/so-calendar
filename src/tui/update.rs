@@ -10,7 +10,7 @@ pub async fn update(model: &mut Model, msg: Message) -> Result<Option<Message>> 
 
         Message::Back => return handle_back_navigation(model),
 
-        Message::ManageAccounts => features::account_overview::handle_accounts_overview(model).await,
+        Message::ManageAccounts => todo!(),
         Message::LoginStarted(ref cancellation_token) => {
             model.current_state = CurrentState::PendingLogin(cancellation_token.clone())
         }

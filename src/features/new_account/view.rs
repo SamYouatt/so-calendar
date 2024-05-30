@@ -6,7 +6,7 @@ use ratatui::widgets::*;
 
 pub fn render_sign_in_options(frame: &mut Frame, selected_index: usize) {
     // Need to render the account page first to render selections as popup over them
-    crate::features::account_overview::view::render(&[], frame);
+    todo!();
 
     let centered_rect = centered_popup(frame.size(), 35, 6);
 
@@ -39,7 +39,7 @@ pub fn render_sign_in_options(frame: &mut Frame, selected_index: usize) {
 
 pub fn render_waiting_for_signin(frame: &mut Frame) {
     // Need to render the account page first to render selections as popup over them
-    crate::features::account_overview::view::render(&[], frame);
+    todo!();
 
     let centered_rect = centered_popup(frame.size(), 35, 6);
 
