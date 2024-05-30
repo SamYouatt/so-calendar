@@ -10,7 +10,7 @@ pub async fn update(model: &mut Model, msg: Message) -> Result<Option<Message>> 
 
         Message::Back => return handle_back_navigation(model),
 
-        Message::ManageAccounts => todo!(),
+        Message::ManageAccounts => model.current_state = CurrentState::ManageConnections(vec![]),
         Message::LoginStarted(ref cancellation_token) => {
             model.current_state = CurrentState::PendingLogin(cancellation_token.clone())
         }
@@ -50,8 +50,8 @@ fn handle_back_navigation(model: &mut Model) -> Result<Option<Message>> {
         CurrentState::PendingLogin(cancellation_token) => {
             cancellation_token.cancel();
             return Ok(Some(Message::ManageAccounts));
-        },
-        _ => {},
+        }
+        _ => {}
     };
 
     Ok(None)
