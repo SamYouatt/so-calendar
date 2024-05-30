@@ -1,6 +1,6 @@
 use tokio_util::sync::CancellationToken;
 
-use crate::{configuration::Application, features::manage_connections::retrieve_accounts::Account};
+use crate::{configuration::Application, features::manage_connections::Account};
 
 use super::MessageSender;
 

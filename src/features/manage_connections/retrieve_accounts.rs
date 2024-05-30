@@ -5,10 +5,7 @@ use std::fmt::Display;
 
 use crate::configuration::Application;
 
-#[derive(Debug)]
-pub struct Account {
-    pub email: String,
-}
+use super::Account;
 
 impl Display for Account {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
