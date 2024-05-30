@@ -12,7 +12,7 @@ pub fn view(model: &Model, frame: &mut Frame) {
         CurrentState::MonthView => features::month_overview::view::render(frame),
         CurrentState::DaysView => features::days_view::view::render(frame),
 
-        CurrentState::Account(accounts) => {
+        CurrentState::ManageConnections(accounts) => {
             features::account_overview::view::render(accounts, frame)
         }
         CurrentState::SignUpOptions(selected_index) => {
@@ -24,7 +24,5 @@ pub fn view(model: &Model, frame: &mut Frame) {
         CurrentState::PendingLogin(_) => {
             features::new_account::view::render_waiting_for_signin(frame)
         }
-
-        CurrentState::Calendars => todo!(),
     };
 }

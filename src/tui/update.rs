@@ -21,7 +21,7 @@ pub async fn update(model: &mut Model, msg: Message) -> Result<Option<Message>> 
 
     // Handle non-unique actions e.g. up/down/select
     match model.current_state {
-        CurrentState::Account(_) if matches!(msg, Message::New) => {
+        CurrentState::ManageConnections(_) if matches!(msg, Message::New) => {
             model.current_state = CurrentState::SignUpOptions(0)
         }
         CurrentState::SignUpOptions(list_state) => {
@@ -45,7 +45,7 @@ fn graceful_shutdown(model: &mut Model) {
 
 fn handle_back_navigation(model: &mut Model) -> Result<Option<Message>> {
     match &model.current_state {
-        CurrentState::Account(_) => model.current_state = CurrentState::DaysView,
+        CurrentState::ManageConnections(_) => model.current_state = CurrentState::DaysView,
         CurrentState::SignUpOptions(_) => return Ok(Some(Message::ManageAccounts)),
         CurrentState::PendingLogin(cancellation_token) => {
             cancellation_token.cancel();

@@ -15,11 +15,9 @@ pub enum CurrentState {
     DaysView,
     MonthView,
 
-    Account(Vec<Account>),
+    ManageConnections(Vec<Account>),
     SignUpOptions(usize),
     PendingLogin(CancellationToken),
-
-    Calendars,
 
     Done,
 }
