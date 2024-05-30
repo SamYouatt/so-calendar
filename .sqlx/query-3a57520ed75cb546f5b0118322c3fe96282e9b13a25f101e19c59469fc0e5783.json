@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE accounts SET access_token = $1, expires_at = $2 WHERE id = $3",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": []
+  },
+  "hash": "3a57520ed75cb546f5b0118322c3fe96282e9b13a25f101e19c59469fc0e5783"
+}

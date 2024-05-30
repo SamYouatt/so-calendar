@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "SELECT access_token, refresh_token, expires_at FROM accounts WHERE email = $1 LIMIT 1",
+  "query": "SELECT access_token, refresh_token, expires_at FROM accounts WHERE id = $1 LIMIT 1",
   "describe": {
     "columns": [
       {
@@ -28,5 +28,5 @@
       false
     ]
   },
-  "hash": "3c216e8442b8af33a304ecc03a84147370cb21bf1041360b669a67131b13fea5"
+  "hash": "8696571420032ff994e8bb1e47fac2d1d82c219b77160b0ff41c265f04b123f0"
 }

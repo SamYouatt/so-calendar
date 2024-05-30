@@ -1,0 +1,38 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT id as \"id:uuid::Uuid\", account_id as \"account_id: uuid::Uuid\", title, description FROM calendars",
+  "describe": {
+    "columns": [
+      {
+        "name": "id:uuid::Uuid",
+        "ordinal": 0,
+        "type_info": "Text"
+      },
+      {
+        "name": "account_id: uuid::Uuid",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "title",
+        "ordinal": 2,
+        "type_info": "Text"
+      },
+      {
+        "name": "description",
+        "ordinal": 3,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "cab0fc8cc74b6021635e1a332754ca443f1ea412c5aa048f18d4687aae4af57d"
+}
