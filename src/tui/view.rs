@@ -12,8 +12,8 @@ pub fn view(model: &Model, frame: &mut Frame) {
         CurrentState::MonthView => features::month_overview::view::render(frame),
         CurrentState::DaysView => features::days_view::view::render(frame),
 
-        CurrentState::ManageConnections(state) => {
-            features::manage_connections::manage_connections_view::render(&state.accounts, &state.calendars, frame)
+        CurrentState::ManageConnections(page_state) => {
+            features::manage_connections::manage_connections_view::render(page_state, frame)
         }
 
         CurrentState::SignUpOptions(selected_index) => {
