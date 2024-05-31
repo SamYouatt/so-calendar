@@ -36,7 +36,7 @@ pub async fn create_default_model() -> Model {
 
     Model {
         application,
-        current_state: socal::tui::model::CurrentState::DaysView,
+        current_state: socal::tui::model::CurrentState::Done,
         message_channel: message_sender,
     }
 }
