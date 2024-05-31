@@ -40,7 +40,7 @@ impl From<CalendarResource> for Calendar {
     }
 }
 
-pub async fn populate_new_calendars(account_id: Uuid, application: &Application) -> Result<()> {
+pub async fn populate_new_calendars(account_id: i64, application: &Application) -> Result<()> {
     let http_client = reqwest::Client::new();
     let calendar_list_request =
         http_client.get("https://www.googleapis.com/calendar/v3/users/me/calendarList");
@@ -62,7 +62,7 @@ pub async fn populate_new_calendars(account_id: Uuid, application: &Application)
     Ok(())
 }
 
-async fn store_calendars(calendars: Vec<Calendar>, account_id: Uuid, application: &Application) -> Result<()> {
+async fn store_calendars(calendars: Vec<Calendar>, account_id: i64, application: &Application) -> Result<()> {
     let store_row_queries: Vec<_> = calendars
         .into_iter()
         .map(|calendar| store_row(calendar, account_id, &application.db))
@@ -78,21 +78,17 @@ async fn store_calendars(calendars: Vec<Calendar>, account_id: Uuid, application
     Ok(())
 }
 
-async fn store_row(calendar: Calendar, account_id: Uuid, db: &SqlitePool) -> Result<()> {
-    let id = Uuid::new_v4().to_string();
-    let account_id_string = account_id.to_string();
-
+async fn store_row(calendar: Calendar, account_id: i64, db: &SqlitePool) -> Result<()> {
     let _ = sqlx::query!(
         "INSERT INTO calendars
-        (id, calendar_id, account_id, title, description, primary_calendar)
-        VALUES ($1, $2, $3, $4, $5, $6)
+        (calendar_id, account_id, title, description, primary_calendar)
+        VALUES ($1, $2, $3, $4, $5)
         ON CONFLICT (calendar_id)
         DO UPDATE SET title=excluded.title,
             description=excluded.description,
             primary_calendar=excluded.primary_calendar",
-        id,
         calendar.id,
-        account_id_string,
+        account_id,
         calendar.title,
         calendar.description,
         calendar.primary_calendar

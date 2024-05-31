@@ -28,7 +28,7 @@ pub async fn handle_tcp_request(
     oauth_client: &BasicClient,
     application: &Application,
     pkce_verifier: PkceCodeVerifier,
-) -> Result<Uuid> {
+) -> Result<i64> {
     let buf_reader = BufReader::new(&mut stream);
     let request_line = buf_reader
         .lines()

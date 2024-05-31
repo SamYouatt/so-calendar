@@ -39,7 +39,7 @@ impl GoogleOAuthClient {
 
     pub async fn send(
         &self,
-        account_id: Uuid,
+        account_id: i64,
         request_builder: RequestBuilder,
     ) -> Result<reqwest::Response, OAuthHttpClientError> {
         let account_id_string = account_id.to_string();
@@ -101,7 +101,7 @@ async fn upsert_access_token_details(
     db: &SqlitePool,
     access_token: &str,
     expires_at: DateTime<Utc>,
-    account_id: Uuid,
+    account_id: i64,
 ) -> Result<(), OAuthHttpClientError> {
     let expires_at_string = expires_at.to_rfc3339();
     let account_id = account_id.to_string();

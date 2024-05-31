@@ -3,8 +3,6 @@ use eyre::Context;
 use sqlx::{query_as, SqlitePool};
 use std::fmt::Display;
 
-use crate::configuration::Application;
-
 use super::Account;
 
 impl Display for Account {
