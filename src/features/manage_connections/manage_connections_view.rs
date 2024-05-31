@@ -3,9 +3,9 @@ use ratatui::symbols::border;
 use ratatui::widgets::block::Title;
 use ratatui::widgets::*;
 
-use super::Account;
+use super::{Account, Calendar};
 
-pub fn render(accounts: &[Account], frame: &mut Frame<'_>) {
+pub fn render(accounts: &[Account], calendars: &[Calendar], frame: &mut Frame<'_>) {
     let vertical_split = Layout::horizontal([Constraint::Percentage(50), Constraint::Percentage(50)])
         .split(frame.size());
 
@@ -23,8 +23,12 @@ pub fn render(accounts: &[Account], frame: &mut Frame<'_>) {
         .highlight_symbol(">>")
         .direction(ListDirection::TopToBottom);
 
-    let calendars_placeholder = Paragraph::new("Calendars here").block(calendars_block);
+    let calendar_list = List::new(calendars.iter().map(|cal| cal.title.to_string()))
+        .block(calendars_block)
+        .highlight_style(Style::default().add_modifier(Modifier::ITALIC))
+        .highlight_symbol(">>")
+        .direction(ListDirection::TopToBottom);
 
     frame.render_widget(account_list, vertical_split[0]);
-    frame.render_widget(calendars_placeholder, vertical_split[1]);
+    frame.render_widget(calendar_list, vertical_split[1]);
 }

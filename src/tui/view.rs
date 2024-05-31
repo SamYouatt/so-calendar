@@ -13,7 +13,7 @@ pub fn view(model: &Model, frame: &mut Frame) {
         CurrentState::DaysView => features::days_view::view::render(frame),
 
         CurrentState::ManageConnections(accounts) => {
-            features::manage_connections::manage_connections_view::render(accounts, frame)
+            features::manage_connections::manage_connections_view::render(accounts, &vec![], frame)
         }
 
         CurrentState::SignUpOptions(selected_index) => {
