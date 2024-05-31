@@ -19,6 +19,19 @@ pub async fn update(model: &mut Model, msg: Message) -> Result<Option<Message>> 
         }
         Message::LoginSuccess => return Ok(Some(Message::ManageAccounts)),
 
+        Message::Up => match model.current_state {
+            CurrentState::ManageConnections(_) => {
+                features::manage_connections::update_manage_connections::handle_up_message(model)
+            }
+            _ => {}
+        },
+        Message::Down => match model.current_state {
+            CurrentState::ManageConnections(_) => {
+                features::manage_connections::update_manage_connections::handle_down_message(model)
+            }
+            _ => {}
+        },
+
         _ => {}
     };
 

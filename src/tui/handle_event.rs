@@ -57,7 +57,6 @@ pub fn handle_key(key: event::KeyEvent) -> Option<Message> {
         KeyCode::Char('n') => Some(Message::New),
 
         KeyCode::Char('a') => Some(Message::ManageAccounts),
-        KeyCode::Char('c') => Some(Message::ManageCalendars),
         _ => None,
     }
 }
