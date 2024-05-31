@@ -10,7 +10,7 @@ pub fn view(model: &Model, frame: &mut Frame) {
         CurrentState::Done => {}
 
         CurrentState::MonthView => features::month_overview::view::render(frame),
-        CurrentState::DaysView => features::days_view::view::render(frame),
+        CurrentState::DaysView(_) => features::days_view::view::render(frame),
 
         CurrentState::ManageConnections(page_state) => {
             features::manage_connections::manage_connections_view::render(page_state, frame)

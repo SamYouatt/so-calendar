@@ -1,6 +1,12 @@
 use tokio_util::sync::CancellationToken;
 
-use crate::{configuration::Application, features::manage_connections::manage_connections_state::ManageConnectionsState};
+use crate::{
+    configuration::Application,
+    features::{
+        days_view::days_view_state::DaysViewState,
+        manage_connections::manage_connections_state::ManageConnectionsState,
+    },
+};
 
 use super::MessageSender;
 
@@ -12,7 +18,7 @@ pub struct Model {
 
 #[derive(Debug)]
 pub enum CurrentState {
-    DaysView,
+    DaysView(DaysViewState),
     MonthView,
 
     ManageConnections(ManageConnectionsState),

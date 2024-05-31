@@ -65,7 +65,7 @@ fn graceful_shutdown(model: &mut Model) {
 
 fn handle_back_navigation(model: &mut Model) -> Result<Option<Message>> {
     match &model.current_state {
-        CurrentState::ManageConnections(_) => model.current_state = CurrentState::DaysView,
+        CurrentState::ManageConnections(_) => return Ok(Some(Message::DaysView)),
         CurrentState::SignUpOptions(_) => return Ok(Some(Message::ManageAccounts)),
         CurrentState::PendingLogin(cancellation_token) => {
             cancellation_token.cancel();
