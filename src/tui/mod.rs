@@ -13,7 +13,7 @@ use self::handle_event::handle_event;
 use self::update::update;
 use self::view::view;
 
-pub(crate) mod model;
+pub mod model;
 pub(crate) mod view;
 pub(crate) mod handle_event;
 pub(crate) mod update;
