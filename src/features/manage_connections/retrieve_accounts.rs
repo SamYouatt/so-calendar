@@ -12,7 +12,7 @@ impl Display for Account {
 }
 
 pub async fn retrieve_accounts(db: &SqlitePool) -> Result<Vec<Account>> {
-    let accounts = query_as!(Account, r#"SELECT id as "id: uuid::Uuid", email FROM accounts"#)
+    let accounts = query_as!(Account, r#"SELECT id, email FROM accounts"#)
         .fetch_all(db)
         .await
         .wrap_err("Error while retrieving stored accounts")?;

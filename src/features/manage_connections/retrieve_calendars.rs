@@ -4,7 +4,7 @@ use sqlx::SqlitePool;
 use super::Calendar;
 
 pub async fn retrieve_calendars(db: &SqlitePool) -> Result<Vec<Calendar>> {
-    let calendars: Vec<Calendar> = sqlx::query_as!(Calendar, r#"SELECT id as "id:uuid::Uuid", account_id as "account_id: uuid::Uuid", title, description FROM calendars"#)
+    let calendars: Vec<Calendar> = sqlx::query_as!(Calendar, r#"SELECT id, account_id, title, description FROM calendars"#)
         .fetch_all(db)
         .await?;
 
