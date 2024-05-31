@@ -24,6 +24,8 @@ pub enum CurrentState {
 
 #[derive(Debug)]
 pub enum Message {
+    DaysView,
+
     ManageAccounts,
     LoginStarted(CancellationToken),
     LoginSuccess,
