@@ -1,6 +1,6 @@
 use tokio_util::sync::CancellationToken;
 
-use crate::{configuration::Application, features::manage_connections::Account};
+use crate::{configuration::Application, features::manage_connections::manage_connections_state::ManageConnectionsState};
 
 use super::MessageSender;
 
@@ -15,7 +15,7 @@ pub enum CurrentState {
     DaysView,
     MonthView,
 
-    ManageConnections(Vec<Account>),
+    ManageConnections(ManageConnectionsState),
     SignUpOptions(usize),
     PendingLogin(CancellationToken),
 

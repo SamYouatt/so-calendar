@@ -2,6 +2,7 @@ use uuid::Uuid;
 
 pub(crate) mod manage_connections_state;
 pub(crate) mod manage_connections_view;
+pub(crate) mod update_manage_connections;
 mod retrieve_accounts;
 mod retrieve_calendars;
 
