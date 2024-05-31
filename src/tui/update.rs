@@ -12,6 +12,7 @@ pub async fn update(model: &mut Model, msg: Message) -> Result<Option<Message>> 
 
         Message::ManageAccounts => {
             features::manage_connections::update_manage_connections::handle_manage_accounts(model)
+                .await?
         }
         Message::LoginStarted(ref cancellation_token) => {
             model.current_state = CurrentState::PendingLogin(cancellation_token.clone())

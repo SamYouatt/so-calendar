@@ -1,6 +1,6 @@
 use color_eyre::eyre::Result;
 use eyre::Context;
-use sqlx::query_as;
+use sqlx::{query_as, SqlitePool};
 use std::fmt::Display;
 
 use crate::configuration::Application;
@@ -13,9 +13,9 @@ impl Display for Account {
     }
 }
 
-pub async fn retrieve_accounts(application: &Application) -> Result<Vec<Account>> {
+pub async fn retrieve_accounts(db: &SqlitePool) -> Result<Vec<Account>> {
     let accounts = query_as!(Account, r#"SELECT id as "id: uuid::Uuid", email FROM accounts"#)
-        .fetch_all(&application.db)
+        .fetch_all(db)
         .await
         .wrap_err("Error while retrieving stored accounts")?;
 
