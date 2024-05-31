@@ -16,7 +16,7 @@ use self::view::view;
 pub mod model;
 pub(crate) mod view;
 pub(crate) mod handle_event;
-pub(crate) mod update;
+pub mod update;
 pub(crate) mod util;
 
 pub type MessageSender = mpsc::UnboundedSender<Message>;
