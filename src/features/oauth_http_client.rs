@@ -1,6 +1,6 @@
 use chrono::{DateTime, Duration, Utc};
 use eyre::Context;
-use oauth2::{basic::BasicClient, reqwest::http_client, RefreshToken, TokenResponse};
+use oauth2::{basic::BasicClient, reqwest::{async_http_client, http_client}, RefreshToken, TokenResponse};
 use reqwest::RequestBuilder;
 use sqlx::{query, SqlitePool};
 use thiserror::Error;
@@ -76,7 +76,8 @@ impl GoogleOAuthClient {
             let token_response = self
                 .oauth_client
                 .exchange_refresh_token(&refresh_token)
-                .request(http_client)
+                .request_async(async_http_client)
+                .await
                 .wrap_err("Failed to exchange refresh token")?;
 
             let new_access_token = token_response.access_token().secret().to_owned();
