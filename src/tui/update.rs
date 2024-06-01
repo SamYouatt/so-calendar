@@ -11,7 +11,7 @@ pub async fn update(model: &mut Model, msg: Message) -> Result<Option<Message>> 
         Message::Back => return handle_back_navigation(model),
 
         Message::DaysView => {
-            features::days_view::handle_days_view_message::handle_load_days_view().await?
+            features::days_view::handle_days_view_message::handle_load_days_view(model).await?
         }
 
         Message::ManageAccounts => {
