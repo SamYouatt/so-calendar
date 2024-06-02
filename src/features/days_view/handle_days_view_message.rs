@@ -32,7 +32,7 @@ struct DateObject {
 }
 
 #[derive(Debug)]
-struct Event {
+pub struct Event {
     title: String,
     description: Option<String>,
     start_time: DateTime<Utc>,
@@ -53,12 +53,14 @@ impl From<EventResource> for Event {
 pub async fn handle_load_days_view(model: &mut Model) -> Result<()> {
     let calendars = retrieve_calendars(&model.application.db).await?;
 
+    let mut all_events = vec![];
     for calendar in calendars.into_iter() {
-        let events = retrieve_calendar_events(calendar, &model.application.google_client).await?;
-        println!("{:?}", events);
+        // TODO: some of these might fail
+        let mut events = retrieve_calendar_events(calendar, &model.application.google_client).await?;
+        all_events.append(&mut events);
     }
 
-    model.current_state = CurrentState::DaysView(DaysViewState {});
+    model.current_state = CurrentState::DaysView(DaysViewState { events: all_events });
     Ok(())
 }
 
@@ -75,11 +77,11 @@ async fn retrieve_calendar_events(
 
     let events_list_url = format!(
         "https://www.googleapis.com/calendar/v3/calendars/{}/events",
-        calendar.calendar_id
+        urlencoding::encode(&calendar.calendar_id)
     );
 
     let http_client = reqwest::Client::new();
-    let calendar_list_request = http_client.get(events_list_url).query(&[
+    let calendar_list_request = http_client.get(events_list_url.to_string()).query(&[
         ("timeMin", events_starting_from.as_str()),
         ("timeMax", events_ending_at.as_str()),
     ]);
@@ -88,16 +90,14 @@ async fn retrieve_calendar_events(
         .send(calendar.account_id, calendar_list_request)
         .await?;
 
-    println!("{:?}", response.bytes().await.unwrap());
+    // TODO: handle non ok responses
 
-    //let event_list: EventListResponse = response.json().await?;
-    //let events: Vec<Event> = event_list
-    //    .items
-    //    .into_iter()
-    //    .map(|event| Event::from(event))
-    //    .collect();
-    //
-    //Ok(events)
+    let event_list: EventListResponse = response.json().await?;
+    let events: Vec<Event> = event_list
+        .items
+        .into_iter()
+        .map(|event| Event::from(event))
+        .collect();
 
-    Ok(vec![])
+    Ok(events)
 }
