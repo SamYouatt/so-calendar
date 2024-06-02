@@ -8,22 +8,17 @@ pub(crate) mod deserialise_event_response;
 
 #[derive(Debug)]
 pub struct Event {
-    id: String,
-    title: String,
-    description: Option<String>,
-    start_time: DateTime<Utc>,
-    end_time: DateTime<Utc>,
+    pub id: String,
+    pub title: String,
+    pub description: Option<String>,
+    pub start_time: DateTime<Utc>,
+    pub end_time: DateTime<Utc>,
 }
 
 #[derive(Debug)]
 pub struct DayEvent {
-    id: String,
-    title: String,
-    description: Option<String>,
-    date: NaiveDate,
-}
-
-#[derive(Debug)]
-pub struct CancelledEvent {
-    id: String,
+    pub id: String,
+    pub title: String,
+    pub description: Option<String>,
+    pub date: NaiveDate,
 }
