@@ -1,4 +1,4 @@
-use super::handle_days_view_message::Event;
+use super::Event;
 
 #[derive(Debug)]
 pub struct DaysViewState {

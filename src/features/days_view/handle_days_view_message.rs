@@ -1,6 +1,5 @@
-use chrono::{DateTime, Duration, Local, NaiveDate, NaiveTime, Utc};
+use chrono::{Duration, Local, NaiveTime};
 use color_eyre::eyre::Result;
-use serde::Deserialize;
 
 use crate::{
     features::{
@@ -10,98 +9,7 @@ use crate::{
     tui::model::{CurrentState, Model},
 };
 
-use super::retrieve_calendars::Calendar;
-
-#[derive(Deserialize, Debug)]
-struct EventListResponse {
-    items: Vec<EventResource>,
-}
-
-#[derive(Deserialize, Debug)]
-#[serde(tag = "status")]
-pub enum EventResource {
-    #[serde(rename = "confirmed")]
-    Confirmed(ConfirmedEvent),
-    #[serde(rename = "tentative")]
-    Tentative(ConfirmedEvent),
-    #[serde(rename = "cancelled")]
-    Cancelled(CancelledEventResource),
-}
-
-#[derive(Deserialize, Debug)]
-#[serde(untagged)]
-enum ConfirmedEvent {
-    Event(ConfirmedEventResource),
-    DayEvent(ConfirmedDayEventResource),
-}
-
-#[derive(Deserialize, Debug)]
-struct ConfirmedEventResource {
-    id: String,
-    summary: String,
-    description: Option<String>,
-    start: DateObject,
-    end: DateObject,
-}
-
-#[derive(Deserialize, Debug)]
-struct ConfirmedDayEventResource {
-    id: String,
-    summary: String,
-    description: Option<String>,
-    start: DayDateObject,
-    end: DayDateObject,
-}
-
-#[derive(Deserialize, Debug)]
-pub struct CancelledEventResource {
-    id: String,
-}
-
-#[derive(Deserialize, Debug)]
-struct DateObject {
-    #[serde(rename = "dateTime")]
-    date_time: DateTime<Utc>,
-}
-
-#[derive(Deserialize, Debug)]
-struct DayDateObject {
-    date: NaiveDate,
-}
-
-#[derive(Debug)]
-pub struct Event {
-    id: String,
-    title: String,
-    description: Option<String>,
-    start_time: DateTime<Utc>,
-    end_time: DateTime<Utc>,
-}
-
-#[derive(Debug)]
-pub struct DayEvent {
-    id: String,
-    title: String,
-    description: Option<String>,
-    date: NaiveDate,
-}
-
-#[derive(Debug)]
-pub struct CancelledEvent {
-    id: String,
-}
-
-impl From<ConfirmedEventResource> for Event {
-    fn from(event_resource: ConfirmedEventResource) -> Self {
-        Event {
-            id: event_resource.id,
-            title: event_resource.summary,
-            description: event_resource.description,
-            start_time: event_resource.start.date_time,
-            end_time: event_resource.end.date_time,
-        }
-    }
-}
+use super::{retrieve_calendars::Calendar, Event, deserialise_event_response::EventListResponse};
 
 pub async fn handle_load_days_view(model: &mut Model) -> Result<()> {
     let calendars = retrieve_calendars(&model.application.db).await?;
