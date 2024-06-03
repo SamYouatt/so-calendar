@@ -85,7 +85,9 @@ impl From<&ConfirmedDayEventResource> for DayEvent {
     }
 }
 
-pub async fn deserialise_event_list_response(response: Response) -> Result<(Vec<Event>, Vec<DayEvent>)> {
+pub async fn deserialise_event_list_response(
+    response: Response,
+) -> Result<(Vec<Event>, Vec<DayEvent>)> {
     let event_list: EventListResponse = response.json().await?;
 
     let events: Vec<Event> = event_list
@@ -113,6 +115,8 @@ pub async fn deserialise_event_list_response(response: Response) -> Result<(Vec<
 
 #[cfg(test)]
 mod test {
+    use crate::features::days_view::DayEvent;
+
     use super::deserialise_event_list_response;
     use reqwest::Response;
 
@@ -181,7 +185,121 @@ mod test {
 
         // Assert
         assert_eq!(events[0].title, "Super cool test event");
+        assert_eq!(events[0].id, "test_id");
+        assert_eq!(events[0].description, None);
         assert_eq!(day_events.len(), 0);
+    }
+
+    #[tokio::test]
+    async fn ignores_cancelled_events() {
+        // Arrange
+        let raw_json = r#"
+{
+  "kind": "calendar#events",
+  "etag": "etag",
+  "summary": "test@test.com",
+  "description": "",
+  "updated": "2024-06-02T14:16:07.916Z",
+  "timeZone": "Europe/London",
+  "accessRole": "owner",
+  "defaultReminders": [
+    {
+      "method": "popup",
+      "minutes": 10
+    }
+  ],
+  "nextSyncToken": "CODj9tyNvYYDEODj9tyNvYYDGAUgkpaKsAIokpaKsAI=",
+  "items": [
+    {
+      "kind": "calendar#event",
+      "etag": "etag",
+      "id": "test_id",
+      "status": "cancelled"
+    }
+  ]
+}        "#;
+        let response = construct_response(raw_json);
+
+        // Act
+        let (events, day_events) = deserialise_event_list_response(response).await.unwrap();
+
+        // Assert
+        assert_eq!(events.len(), 0);
+        assert_eq!(day_events.len(), 0);
+    }
+
+    #[tokio::test]
+    async fn parse_confired_day_events() {
+        // Arrange
+        let raw_json = r#"
+{
+  "kind": "calendar#events",
+  "etag": "etag",
+  "summary": "test@test.com",
+  "description": "",
+  "updated": "2024-06-02T14:16:07.916Z",
+  "timeZone": "Europe/London",
+  "accessRole": "owner",
+  "defaultReminders": [
+    {
+      "method": "popup",
+      "minutes": 10
+    }
+  ],
+  "nextSyncToken": "CODj9tyNvYYDEODj9tyNvYYDGAUgkpaKsAIokpaKsAI=",
+  "items": [
+    {
+      "kind": "calendar#event",
+      "etag": "etag",
+      "id": "test_id",
+      "status": "confirmed",
+      "htmlLink": "test_link",
+      "created": "2023-06-15T13:04:50.000Z",
+      "updated": "2024-01-25T14:21:25.869Z",
+      "summary": "Super cool all day test event",
+      "creator": {
+        "email": "sam.youatt@gearset.com",
+        "self": true
+      },
+      "organizer": {
+        "email": "test@test.com",
+        "self": true
+      },
+      "start": {
+        "date": "2023-06-19"
+      },
+      "end": {
+        "date": "2023-06-20"
+      },
+      "recurrence": [
+        "RRULE:FREQ=WEEKLY;BYDAY=MO"
+      ],
+      "transparency": "transparent",
+      "visibility": "public",
+      "iCalUID": "ical@google.com",
+      "sequence": 0,
+      "reminders": {
+        "useDefault": false
+      },
+      "workingLocationProperties": {
+        "type": "homeOffice",
+        "homeOffice": {}
+      },
+      "eventType": "workingLocation"
+    }
+  ]
+}     
+        "#;
+        let response = construct_response(raw_json);
+
+        // Act
+        let (events, day_events) = deserialise_event_list_response(response).await.unwrap();
+
+        // Assert
+        assert_eq!(day_events[0].title, "Super cool all day test event");
+        assert_eq!(day_events[0].id, "test_id");
+        assert_eq!(day_events[0].description, None);
+        assert_eq!(events.len(), 0);
     }
 
     fn construct_response(body: &str) -> Response {
