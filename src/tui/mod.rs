@@ -1,23 +1,29 @@
 use std::io::stdout;
 
-use crossterm::{terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen}, ExecutableCommand};
-use ratatui::{backend::{Backend, CrosstermBackend}, Terminal};
-use tokio::sync::mpsc;
 use color_eyre::eyre::Result;
+use crossterm::{
+    terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
+    ExecutableCommand,
+};
+use ratatui::{
+    backend::{Backend, CrosstermBackend},
+    Terminal,
+};
+use tokio::sync::mpsc;
 use tokio_util::sync::CancellationToken;
 
-use crate::configuration::Application;
+use crate::{configuration::Application, features::days_view::days_view_state::DaysViewState};
 
-use self::model::{CurrentState, Message, Model};
 use self::handle_event::handle_event;
+use self::model::{CurrentState, Message, Model};
 use self::update::update;
 use self::view::view;
 
-pub mod model;
-pub(crate) mod view;
 pub(crate) mod handle_event;
+pub mod model;
 pub mod update;
 pub(crate) mod util;
+pub(crate) mod view;
 
 pub type MessageSender = mpsc::UnboundedSender<Message>;
 
@@ -37,19 +43,18 @@ pub fn restore_terminal() -> Result<()> {
 pub async fn run_tui(application: Application) -> Result<()> {
     let (message_sender, mut message_receiver) = mpsc::unbounded_channel();
 
+    let events = vec![];
+    let day_events = vec![];
+
     let mut terminal = init_terminal()?;
     let mut model = Model {
         application,
-        current_state: CurrentState::MonthView,
+        current_state: CurrentState::DaysView(DaysViewState { events, day_events }),
         message_channel: message_sender.clone(),
     };
 
     let cancellation_token = CancellationToken::new();
-    let event_thread = handle_event(
-        &model,
-        message_sender.clone(),
-        cancellation_token.clone(),
-    );
+    let event_thread = handle_event(&model, message_sender.clone(), cancellation_token.clone());
 
     loop {
         terminal.draw(|frame| view(&model, frame))?;
