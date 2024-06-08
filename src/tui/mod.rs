@@ -14,7 +14,7 @@ use tokio_util::sync::CancellationToken;
 
 use crate::{configuration::Application, features::days_view::days_view_state::DaysViewState};
 
-use self::handle_event::handle_event;
+use self::{handle_event::handle_event, model::EventsState};
 use self::model::{CurrentState, Message, Model};
 use self::update::update;
 use self::view::view;
@@ -51,6 +51,7 @@ pub async fn run_tui(application: Application) -> Result<()> {
         application,
         current_state: CurrentState::DaysView(DaysViewState { events, day_events }),
         message_channel: message_sender.clone(),
+        events_state: EventsState::Ready(vec![], vec![]),
     };
 
     let cancellation_token = CancellationToken::new();
