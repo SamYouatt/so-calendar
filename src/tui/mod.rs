@@ -1,5 +1,6 @@
 use std::io::stdout;
 
+use chrono::{DateTime, Local, NaiveDate, Utc};
 use color_eyre::eyre::Result;
 use crossterm::{
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
@@ -12,12 +13,15 @@ use ratatui::{
 use tokio::sync::mpsc;
 use tokio_util::sync::CancellationToken;
 
-use crate::{configuration::Application, features::days_view::days_view_state::DaysViewState};
+use crate::{
+    configuration::Application,
+    domain::events::{DayEvent, Event},
+};
 
-use self::{handle_event::handle_event, model::EventsState};
 use self::model::{CurrentState, Message, Model};
 use self::update::update;
 use self::view::view;
+use self::{handle_event::handle_event, model::EventsState};
 
 pub(crate) mod handle_event;
 pub mod model;
@@ -43,15 +47,46 @@ pub fn restore_terminal() -> Result<()> {
 pub async fn run_tui(application: Application) -> Result<()> {
     let (message_sender, mut message_receiver) = mpsc::unbounded_channel();
 
-    let events = vec![];
-    let day_events = vec![];
+    let lunch_start = DateTime::parse_from_rfc3339("2024-06-03T12:00:00Z")
+        .unwrap()
+        .with_timezone(&Utc);
+    let lunch_end = DateTime::parse_from_rfc3339("2024-06-03T13:30:00Z")
+        .unwrap()
+        .with_timezone(&Utc);
+    let meeting_start_time = DateTime::parse_from_rfc3339("2024-06-03T16:30:00Z")
+        .unwrap()
+        .with_timezone(&Utc);
+    let meeting_end_time = DateTime::parse_from_rfc3339("2024-06-03T17:30:00Z")
+        .unwrap()
+        .with_timezone(&Utc);
+
+    let events = vec![Event {
+        id: "blah".to_string(),
+        title: "Lunch".to_string(),
+        description: None,
+        start_time: lunch_start,
+        end_time: lunch_end,
+    },
+    Event {
+        id: "sttez".to_string(),
+        title: "Important meeting".to_string(),
+        description: Some("Very important meeting with lots of important people. Very important things will be discussed. It is very important a conclusion is reached".to_string()),
+        start_time: meeting_start_time,
+        end_time: meeting_end_time,
+    }];
+    let day_events = vec![DayEvent {
+        id: "scwhag".to_string(),
+        title: "Birthday".to_string(),
+        description: Some("Wish happy birthday".to_string()),
+        date: Local::now().naive_local().date(),
+    }];
 
     let mut terminal = init_terminal()?;
     let mut model = Model {
         application,
-        current_state: CurrentState::DaysView(DaysViewState { events, day_events }),
+        current_state: CurrentState::MonthView,
         message_channel: message_sender.clone(),
-        events_state: EventsState::Ready(vec![], vec![]),
+        events_state: EventsState::Ready(events, day_events),
     };
 
     let cancellation_token = CancellationToken::new();
