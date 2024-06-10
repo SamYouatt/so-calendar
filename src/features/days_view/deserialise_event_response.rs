@@ -3,7 +3,7 @@ use color_eyre::eyre::Result;
 use reqwest::Response;
 use serde::Deserialize;
 
-use super::{DayEvent, Event};
+use crate::domain::events::{DayEvent, Event};
 
 #[derive(Deserialize, Debug)]
 pub struct EventListResponse {

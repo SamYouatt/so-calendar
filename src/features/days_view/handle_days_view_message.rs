@@ -2,16 +2,14 @@ use chrono::{Duration, Local, NaiveTime};
 use color_eyre::eyre::Result;
 
 use crate::{
-    features::{
+    domain::events::{DayEvent, Event}, features::{
         days_view::{days_view_state::DaysViewState, retrieve_calendars::retrieve_calendars},
         oauth_http_client::GoogleOAuthClient,
-    },
-    tui::model::{CurrentState, Model},
+    }, tui::model::{CurrentState, Model}
 };
 
 use super::{
     deserialise_event_response::deserialise_event_list_response, retrieve_calendars::Calendar,
-    DayEvent, Event,
 };
 
 pub async fn handle_load_days_view(model: &mut Model) -> Result<()> {

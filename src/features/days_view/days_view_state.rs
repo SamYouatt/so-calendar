@@ -1,4 +1,4 @@
-use super::{DayEvent, Event};
+use crate::domain::events::{DayEvent, Event};
 
 #[derive(Debug)]
 pub struct DaysViewState {
