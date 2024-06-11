@@ -13,15 +13,29 @@ impl Widget for TodayWidget {
     where
         Self: Sized,
     {
-        let today_block = Block::default()
-            .padding(Padding::left(1))
+        let main_container = Block::default()
+            .padding(Padding::horizontal(1))
             .style(Style::new().bg(tailwind::STONE.c100));
+        let main_container_area = main_container.inner(area);
+        main_container.render(area, buf);
+
+
+        let main_layout = Layout::vertical([
+            Constraint::Length(1),
+            Constraint::Length(1),
+            Constraint::Fill(1),
+        ])
+        .split(main_container_area);
 
         let formatted_date = self.date.format("%d %B, %A").to_string();
         Paragraph::new(formatted_date)
-            .block(today_block)
             .style(Style::new().fg(tailwind::RED.c500).bold())
-            .render(area, buf);
+            .render(main_layout[0], buf);
+
+        let separator: String = std::iter::repeat("-").take(area.width.into()).collect();
+        Paragraph::new(separator)
+            .style(Style::new().fg(tailwind::STONE.c400))
+            .render(main_layout[1], buf);
     }
 }
 
