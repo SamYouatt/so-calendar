@@ -6,15 +6,7 @@ use ratatui::widgets::*;
 
 use crate::domain::events::{DayEvent, Event};
 use crate::tui::model::EventsState;
-
-/// Example: "really long" -> "really l…"
-fn truncate_text(text: &str, length: usize) -> String {
-    if text.len() < length {
-        return text.to_string();
-    }
-
-    format!("{}…", &text[..length-1].trim())
-}
+use crate::util::text_helpers::truncate_text;
 
 struct EventWidget<'a> {
     event: &'a Event,
