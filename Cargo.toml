@@ -19,6 +19,7 @@ color-eyre = "0.6.3"
 copypasta = "0.10.1"
 crossterm = { version = "0.27.0", features = ["event-stream"] }
 dirs-next = "2.0.0"
+dotenv_codegen = "0.15.0"
 eyre = "0.6.12"
 futures = "0.3.30"
 http = "1.1.0"

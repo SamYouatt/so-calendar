@@ -1,4 +1,5 @@
 use color_eyre::eyre::Result;
+use dotenv_codegen::dotenv;
 use eyre::Context;
 use sqlx::{sqlite::SqliteConnectOptions, SqlitePool};
 use std::{fs, path::PathBuf};
@@ -47,12 +48,15 @@ fn configure_oauth_client() -> Result<BasicClient> {
     let token_url_raw = String::from("https://www.googleapis.com/oauth2/v3/token");
     let token_url = TokenUrl::new(token_url_raw).wrap_err("Invalid token endpoint")?;
 
+    let client_id = dotenv!("GOOGLE_CLIENT_ID", "Missing Google OAuth Client Id");
+    let client_secret = dotenv!("GOOGLE_CLIENT_SECRET", "Missing Google OAuth Client Secret");
+
     Ok(BasicClient::new(
         ClientId::new(
-            "357015344564-7rf7b47n7add82k2t3hajfhq2pklthen.apps.googleusercontent.com".into(),
+            client_id.into(),
         ),
         Some(ClientSecret::new(
-            "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".into(),
+            client_secret.into(),
         )),
         auth_url,
         Some(token_url),
