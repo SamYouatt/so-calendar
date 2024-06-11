@@ -5,6 +5,12 @@ use ratatui::widgets::*;
 use super::manage_connections_state::ManageConnectionsState;
 
 pub fn render(state: &ManageConnectionsState, frame: &mut Frame<'_>) {
+    if state.accounts.len() == 0 {
+        let account_placeholder = Paragraph::new("Connect an account...");
+        frame.render_widget(account_placeholder, frame.size());
+        return;
+    }
+
     let selected_account = &state.accounts[state.selected_account_index];
 
     let accounts = state.accounts.iter().map(|acc| acc.email.to_string());
