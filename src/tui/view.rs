@@ -9,7 +9,7 @@ pub fn view(model: &Model, frame: &mut Frame) {
     match &model.current_state {
         CurrentState::Done => {}
 
-        CurrentState::MonthView => features::month_view::view::render(frame),
+        CurrentState::MonthView => features::month_view::view::render(frame, &model.events_state),
         CurrentState::DaysView(_) => features::days_view::view::render(frame),
 
         CurrentState::ManageConnections(page_state) => {
