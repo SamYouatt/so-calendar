@@ -1,21 +1,31 @@
 use chrono::NaiveDate;
-use ratatui::{layout::Flex, prelude::*};
 use ratatui::style::palette::tailwind;
 use ratatui::widgets::Widget;
 use ratatui::widgets::*;
+use ratatui::{layout::Flex, prelude::*};
 
 use crate::domain::events::{DayEvent, Event};
 
 use super::day_event_widget::DayEventWidget;
 use super::event_widget::EventWidget;
 
-pub struct TodayWidget<'a> {
+pub struct DaySummaryWidget<'a> {
     date: NaiveDate,
     events: &'a [Event],
     day_events: &'a [DayEvent],
 }
 
-impl Widget for TodayWidget<'_> {
+impl<'a> DaySummaryWidget<'a> {
+    pub fn new(date: NaiveDate, events: &'a [Event], day_events: &'a [DayEvent]) -> Self {
+        Self {
+            date,
+            events,
+            day_events,
+        }
+    }
+}
+
+impl Widget for DaySummaryWidget<'_> {
     fn render(self, area: Rect, buf: &mut Buffer)
     where
         Self: Sized,

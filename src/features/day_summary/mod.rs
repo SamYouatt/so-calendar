@@ -1,1 +1,1 @@
-mod components;
+pub(crate) mod components;
