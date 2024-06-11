@@ -5,7 +5,7 @@ use ratatui::style::palette::tailwind;
 use ratatui::symbols::border;
 use ratatui::widgets::*;
 
-use crate::domain::events::Event;
+use crate::domain::events::{DayEvent, Event};
 use crate::tui::model::EventsState;
 
 struct EventWidget<'a> {
@@ -72,9 +72,50 @@ impl Widget for EventWidget<'_> {
     }
 }
 
+struct DayEventWidget<'a> {
+    event: &'a DayEvent,
+}
+
+impl<'a> DayEventWidget<'a> {
+    pub fn new(event: &'a DayEvent) -> Self {
+        Self { event }
+    }
+}
+
+impl Widget for DayEventWidget<'_> {
+    fn render(self, area: Rect, buf: &mut Buffer)
+    where
+        Self: Sized,
+    {
+        let event_row_layout = Layout::horizontal([
+            Constraint::Length(1),
+            Constraint::Fill(1),
+            Constraint::Length(7),
+        ])
+        .spacing(1)
+        .split(area);
+
+        // DayEvent dot indicator
+        Paragraph::new("●")
+            .style(Style::new().fg(tailwind::EMERALD.c500).bold())
+            .render(event_row_layout[0], buf);
+
+        // Main event information
+        Paragraph::new(self.event.title.to_string())
+            .style(Style::new().fg(tailwind::STONE.c800))
+            .render(event_row_layout[1], buf);
+
+        // All day indicator
+        Paragraph::new("All day")
+            .style(Style::new().fg(tailwind::STONE.c600))
+            .render(event_row_layout[2], buf);
+    }
+}
+
 struct TodayWidget<'a> {
     date: NaiveDate,
     events: &'a [Event],
+    day_events: &'a [DayEvent],
 }
 
 impl Widget for TodayWidget<'_> {
@@ -88,28 +129,49 @@ impl Widget for TodayWidget<'_> {
         let main_container_area = main_container.inner(area);
         main_container.render(area, buf);
 
+        let num_day_events: u16 = self
+            .day_events
+            .len()
+            .try_into()
+            .expect("way too many day events");
+
         let main_layout = Layout::vertical([
             Constraint::Length(1),
             Constraint::Length(1),
+            Constraint::Length(num_day_events + 1),
             Constraint::Fill(1),
         ])
         .split(main_container_area);
 
+        // Selected date
         let formatted_date = self.date.format("%d %B, %A").to_string();
         Paragraph::new(formatted_date)
             .style(Style::new().fg(tailwind::RED.c500).bold())
             .render(main_layout[0], buf);
 
+        // Separator
         let separator: String = std::iter::repeat("-").take(area.width.into()).collect();
         Paragraph::new(separator)
             .style(Style::new().fg(tailwind::STONE.c400))
             .render(main_layout[1], buf);
 
+        // Day events list
+        let day_events_layout_constraints =
+            std::iter::repeat(Constraint::Length(1)).take(num_day_events.into());
+        let events_layout = Layout::vertical(day_events_layout_constraints)
+            .flex(Flex::Start)
+            .split(main_layout[2]);
+
+        for (i, day_event) in self.day_events.iter().enumerate() {
+            DayEventWidget::new(day_event).render(events_layout[i], buf);
+        }
+
+        // Events list
         let events_layout_constraints =
             std::iter::repeat(Constraint::Length(2)).take(self.events.len());
         let events_layout = Layout::vertical(events_layout_constraints)
             .flex(Flex::Start)
-            .split(main_layout[2]);
+            .split(main_layout[3]);
 
         for (i, event) in self.events.iter().enumerate() {
             EventWidget::new(event).render(events_layout[i], buf);
@@ -118,7 +180,7 @@ impl Widget for TodayWidget<'_> {
 }
 
 pub fn render(frame: &mut Frame, events_state: &EventsState) {
-    let (events, _day_events) = match events_state {
+    let (events, day_events) = match events_state {
         EventsState::Ready(events, day_events) => (events, day_events),
         _ => todo!(),
     };
@@ -132,6 +194,7 @@ pub fn render(frame: &mut Frame, events_state: &EventsState) {
     let today_widget = TodayWidget {
         date: Local::now().date_naive(),
         events,
+        day_events,
     };
 
     frame.render_widget(month_view_placeholder, main_layout[0]);
