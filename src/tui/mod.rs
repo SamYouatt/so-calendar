@@ -10,7 +10,7 @@ use ratatui::{
     backend::{Backend, CrosstermBackend},
     Terminal,
 };
-use tokio::sync::mpsc;
+use tokio::sync::mpsc::{self, UnboundedReceiver};
 use tokio_util::sync::CancellationToken;
 
 use crate::{
@@ -41,6 +41,22 @@ pub fn init_terminal() -> Result<Terminal<impl Backend>> {
 pub fn restore_terminal() -> Result<()> {
     stdout().execute(LeaveAlternateScreen)?;
     disable_raw_mode()?;
+    Ok(())
+}
+
+async fn main_loop(
+    terminal: &mut Terminal<impl Backend>,
+    model: &mut Model,
+    message_receiver: &mut UnboundedReceiver<Message>,
+) -> Result<()> {
+    terminal.draw(|frame| view(&model, frame))?;
+
+    let mut current_msg = message_receiver.recv().await;
+
+    while current_msg.is_some() {
+        current_msg = update(model, current_msg.unwrap()).await?;
+    }
+
     Ok(())
 }
 
@@ -93,21 +109,23 @@ pub async fn run_tui(application: Application) -> Result<()> {
     let event_thread = handle_event(&model, message_sender.clone(), cancellation_token.clone());
 
     loop {
-        terminal.draw(|frame| view(&model, frame))?;
+        match main_loop(&mut terminal, &mut model, &mut message_receiver).await {
+            Ok(_) => {
+                if matches!(model.current_state, CurrentState::Done) {
+                    cancellation_token.cancel();
+                    event_thread.await?;
 
-        let mut current_msg = message_receiver.recv().await;
+                    restore_terminal()?;
 
-        while current_msg.is_some() {
-            current_msg = update(&mut model, current_msg.unwrap()).await?;
-        }
+                    return Ok(());
+                }
+            }
+            Err(e) => {
+                cancellation_token.cancel();
+                event_thread.await?;
 
-        if matches!(model.current_state, CurrentState::Done) {
-            break;
-        }
+                return Err(e);
+            }
+        };
     }
-
-    cancellation_token.cancel();
-    event_thread.await?;
-
-    restore_terminal()
 }
