@@ -1,5 +1,6 @@
 use chrono::{Duration, Local, NaiveDate, NaiveTime};
 use color_eyre::eyre::Result;
+use eyre::Context;
 use sqlx::SqlitePool;
 
 use crate::{
@@ -53,12 +54,10 @@ async fn fetch_events(
 }
 
 async fn retrieve_calendars(db: &SqlitePool) -> Result<Vec<Calendar>> {
-    let calendars: Vec<Calendar> =
-        sqlx::query_as!(Calendar, "SELECT calendar_id, account_id FROM calendars")
-            .fetch_all(db)
-            .await?;
-
-    Ok(calendars)
+    sqlx::query_as!(Calendar, "SELECT calendar_id, account_id FROM calendars")
+        .fetch_all(db)
+        .await
+        .wrap_err("error while retrieving stored calendars")
 }
 
 async fn retrieve_calendar_events(
