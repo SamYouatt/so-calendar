@@ -9,7 +9,7 @@ use crate::tui::model::EventsState;
 pub fn render(frame: &mut Frame, events_state: &EventsState) {
     let (events, day_events) = match events_state {
         EventsState::Ready(events, day_events) => (events, day_events),
-        _ => todo!(),
+        _ => return,
     };
 
     let main_layout =

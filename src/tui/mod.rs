@@ -1,6 +1,6 @@
 use std::io::stdout;
 
-use chrono::{DateTime, Local, NaiveDate, Utc};
+use chrono::{DateTime, Duration, Local, NaiveDate, NaiveTime, Utc};
 use color_eyre::eyre::Result;
 use crossterm::{
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
@@ -15,7 +15,7 @@ use tokio_util::sync::CancellationToken;
 
 use crate::{
     configuration::Application,
-    domain::events::{DayEvent, Event},
+    domain::events::{DayEvent, Event}, features::fetch_events::fetch_events::run_fetch_events_task,
 };
 
 use self::model::{CurrentState, Message, Model};
@@ -102,11 +102,16 @@ pub async fn run_tui(application: Application) -> Result<()> {
         application,
         current_state: CurrentState::MonthView,
         message_channel: message_sender.clone(),
-        events_state: EventsState::Ready(events, day_events),
+        events_state: EventsState::Loading,
     };
 
     let cancellation_token = CancellationToken::new();
     let event_thread = handle_event(&model, message_sender.clone(), cancellation_token.clone());
+
+    let now = Local::now();
+    let today_midnight = now.with_time(NaiveTime::MIN).unwrap();
+    let tomorrow_midnight = today_midnight + Duration::days(2);
+    run_fetch_events_task(today_midnight, tomorrow_midnight, &model);
 
     loop {
         match main_loop(&mut terminal, &mut model, &mut message_receiver).await {

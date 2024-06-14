@@ -1,7 +1,7 @@
 use crate::features;
 use color_eyre::eyre::Result;
 
-use super::model::{CurrentState, Message, Model};
+use super::model::{CurrentState, EventsState, Message, Model};
 
 pub async fn update(model: &mut Model, msg: Message) -> Result<Option<Message>> {
     // Handle any unique actions
@@ -9,6 +9,11 @@ pub async fn update(model: &mut Model, msg: Message) -> Result<Option<Message>> 
         Message::Quit => graceful_shutdown(model),
 
         Message::Back => return handle_back_navigation(model),
+
+        Message::EventsReady(events, day_events) => {
+            model.events_state = EventsState::Ready(events, day_events);
+            return Ok(None);
+        }
 
         Message::DaysView => {
             features::days_view::handle_days_view_message::handle_load_days_view(model).await?
