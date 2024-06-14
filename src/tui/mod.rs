@@ -1,6 +1,6 @@
 use std::io::stdout;
 
-use chrono::{DateTime, Local, NaiveDate, Utc};
+use chrono::{DateTime, Duration, Local, NaiveDate, NaiveTime, Utc};
 use color_eyre::eyre::Result;
 use crossterm::{
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
@@ -10,12 +10,12 @@ use ratatui::{
     backend::{Backend, CrosstermBackend},
     Terminal,
 };
-use tokio::sync::mpsc;
+use tokio::sync::mpsc::{self, UnboundedReceiver};
 use tokio_util::sync::CancellationToken;
 
 use crate::{
     configuration::Application,
-    domain::events::{DayEvent, Event},
+    domain::events::{DayEvent, Event}, features::fetch_events::fetch_events::run_fetch_events_task,
 };
 
 use self::model::{CurrentState, Message, Model};
@@ -41,6 +41,22 @@ pub fn init_terminal() -> Result<Terminal<impl Backend>> {
 pub fn restore_terminal() -> Result<()> {
     stdout().execute(LeaveAlternateScreen)?;
     disable_raw_mode()?;
+    Ok(())
+}
+
+async fn main_loop(
+    terminal: &mut Terminal<impl Backend>,
+    model: &mut Model,
+    message_receiver: &mut UnboundedReceiver<Message>,
+) -> Result<()> {
+    terminal.draw(|frame| view(&model, frame))?;
+
+    let mut current_msg = message_receiver.recv().await;
+
+    while current_msg.is_some() {
+        current_msg = update(model, current_msg.unwrap()).await?;
+    }
+
     Ok(())
 }
 
@@ -86,28 +102,35 @@ pub async fn run_tui(application: Application) -> Result<()> {
         application,
         current_state: CurrentState::MonthView,
         message_channel: message_sender.clone(),
-        events_state: EventsState::Ready(events, day_events),
+        events_state: EventsState::Loading,
     };
 
     let cancellation_token = CancellationToken::new();
     let event_thread = handle_event(&model, message_sender.clone(), cancellation_token.clone());
 
+    let now = Local::now();
+    let today_midnight = now.with_time(NaiveTime::MIN).unwrap();
+    let tomorrow_midnight = today_midnight + Duration::days(2);
+    run_fetch_events_task(today_midnight, tomorrow_midnight, &model);
+
     loop {
-        terminal.draw(|frame| view(&model, frame))?;
+        match main_loop(&mut terminal, &mut model, &mut message_receiver).await {
+            Ok(_) => {
+                if matches!(model.current_state, CurrentState::Done) {
+                    cancellation_token.cancel();
+                    event_thread.await?;
 
-        let mut current_msg = message_receiver.recv().await;
+                    restore_terminal()?;
 
-        while current_msg.is_some() {
-            current_msg = update(&mut model, current_msg.unwrap()).await?;
-        }
+                    return Ok(());
+                }
+            }
+            Err(e) => {
+                cancellation_token.cancel();
+                event_thread.await?;
 
-        if matches!(model.current_state, CurrentState::Done) {
-            break;
-        }
+                return Err(e);
+            }
+        };
     }
-
-    cancellation_token.cancel();
-    event_thread.await?;
-
-    restore_terminal()
 }
