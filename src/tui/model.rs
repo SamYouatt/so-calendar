@@ -39,6 +39,8 @@ pub enum EventsState {
 pub enum Message {
     DaysView,
 
+    EventsReady(Vec<Event>, Vec<DayEvent>),
+
     ManageAccounts,
     LoginStarted(CancellationToken),
     LoginSuccess,

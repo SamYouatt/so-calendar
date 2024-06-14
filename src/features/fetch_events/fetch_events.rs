@@ -9,7 +9,7 @@ use crate::{
         events::{DayEvent, Event},
     },
     features::oauth_http_client::GoogleOAuthClient,
-    tui::model::Model,
+    tui::model::{Message, Model},
 };
 
 use super::deserialise_event_response::deserialise_event_list_response;
@@ -18,14 +18,20 @@ use super::deserialise_event_response::deserialise_event_list_response;
 /// the results, or an error message
 /// start_time: start time to fetch events
 /// end_time: exclusive end time to fetch events
-pub fn run_fetch_events_task(start_time: DateTime<Local>, end_time: DateTime<Local>, model: &Model) {
+pub fn run_fetch_events_task(
+    start_time: DateTime<Local>,
+    end_time: DateTime<Local>,
+    model: &Model,
+) {
     let db = model.application.db.clone();
     let google_client = model.application.google_client.clone();
+    let message_channel = model.message_channel.clone();
 
     tokio::spawn(async move {
         match fetch_events(start_time, end_time, db, google_client).await {
-            // Send finished event with payload
-            Ok(_) => todo!(),
+            Ok(result) => message_channel
+                .send(Message::EventsReady(result.0, result.1))
+                .expect("Message channel should never be closed"),
             // Create error message event with user facing error
             Err(_) => todo!(),
         }
@@ -51,7 +57,7 @@ async fn fetch_events(
         all_day_events.append(&mut day_events);
     }
 
-    todo!()
+    Ok((all_events, all_day_events))
 }
 
 async fn retrieve_calendars(db: &SqlitePool) -> Result<Vec<Calendar>> {
