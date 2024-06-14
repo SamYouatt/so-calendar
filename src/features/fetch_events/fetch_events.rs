@@ -33,7 +33,12 @@ pub fn run_fetch_events_task(
                 .send(Message::EventsReady(result.0, result.1))
                 .expect("Message channel should never be closed"),
             // Create error message event with user facing error
-            Err(_) => todo!(),
+            Err(_) => {
+                // TODO: error tracing here
+                message_channel
+                    .send(Message::EventsError)
+                    .expect("message channel should never be closed")
+            }
         }
     });
 }
