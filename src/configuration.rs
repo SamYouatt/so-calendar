@@ -8,7 +8,7 @@ use oauth2::{basic::BasicClient, AuthUrl, ClientId, ClientSecret, RedirectUrl, T
 
 use crate::features::oauth_http_client::GoogleOAuthClient;
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct Application {
     pub data_dir: PathBuf,
     pub db_path: PathBuf,

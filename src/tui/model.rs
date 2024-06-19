@@ -9,6 +9,7 @@ use crate::{
 
 use super::MessageSender;
 
+#[derive(Debug)]
 pub struct Model {
     pub application: Application,
     pub current_state: CurrentState,
