@@ -23,13 +23,13 @@ pub enum EventResource {
 
 #[derive(Deserialize, Debug)]
 #[serde(untagged)]
-enum ConfirmedEvent {
+pub enum ConfirmedEvent {
     Event(ConfirmedEventResource),
     DayEvent(ConfirmedDayEventResource),
 }
 
 #[derive(Deserialize, Debug)]
-struct ConfirmedEventResource {
+pub struct ConfirmedEventResource {
     id: String,
     summary: String,
     description: Option<String>,
@@ -38,7 +38,7 @@ struct ConfirmedEventResource {
 }
 
 #[derive(Deserialize, Debug)]
-struct ConfirmedDayEventResource {
+pub struct ConfirmedDayEventResource {
     id: String,
     summary: String,
     description: Option<String>,
@@ -115,8 +115,6 @@ pub async fn deserialise_event_list_response(
 
 #[cfg(test)]
 mod test {
-    use crate::features::days_view::DayEvent;
-
     use super::deserialise_event_list_response;
     use reqwest::Response;
 
