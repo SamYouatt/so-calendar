@@ -29,12 +29,13 @@ pub fn run_fetch_events_task(
 
     tokio::spawn(async move {
         match fetch_events(start_time, end_time, db, google_client).await {
-            Ok(result) => message_channel
-                .send(Message::EventsReady(result.0, result.1))
-                .expect("Message channel should never be closed"),
-            // Create error message event with user facing error
-            Err(_) => {
-                // TODO: error tracing here
+            Ok(result) => {
+                message_channel
+                    .send(Message::EventsReady(result.0, result.1))
+                    .expect("Message channel should never be closed");
+            }
+            Err(e) => {
+                tracing::error!("Failed to fetch events: {:?}", e);
                 message_channel
                     .send(Message::EventsError)
                     .expect("message channel should never be closed")
@@ -43,6 +44,7 @@ pub fn run_fetch_events_task(
     });
 }
 
+#[tracing::instrument(name = "fetch_events", skip(db, google_client))]
 async fn fetch_events(
     start_time: DateTime<Local>,
     end_time: DateTime<Local>,
@@ -62,6 +64,10 @@ async fn fetch_events(
         all_day_events.append(&mut day_events);
     }
 
+    tracing::info!(
+        fetch_events.day_events = all_events.len(),
+        fetch_events.all_day_events = all_day_events.len()
+    );
     Ok((all_events, all_day_events))
 }
 
@@ -72,6 +78,7 @@ async fn retrieve_calendars(db: &SqlitePool) -> Result<Vec<Calendar>> {
         .wrap_err("error while retrieving stored calendars")
 }
 
+#[tracing::instrument(name = "Retrieve calendar events")]
 async fn retrieve_calendar_events(
     start_time: DateTime<Local>,
     end_time: DateTime<Local>,
