@@ -6,7 +6,7 @@ use sqlx::{query, SqlitePool};
 use thiserror::Error;
 use uuid::Uuid;
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct GoogleOAuthClient {
     db: SqlitePool,
     oauth_client: BasicClient,

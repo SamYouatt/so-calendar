@@ -2,6 +2,9 @@ use std::panic;
 
 use color_eyre::eyre::Result;
 use socal::{configuration::Application, run, tui::restore_terminal};
+use tracing::initialise_tracing;
+
+mod tracing;
 
 // Ensure terminal is reset properly upon panic
 fn install_panic_hook() -> Result<()> {
@@ -26,6 +29,8 @@ fn install_panic_hook() -> Result<()> {
 #[tokio::main]
 async fn main() -> Result<()> {
     install_panic_hook()?;
+
+    initialise_tracing()?;
 
     let application = Application::setup().await?;
 
