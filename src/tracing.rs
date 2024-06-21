@@ -1,8 +1,9 @@
 use std::fs;
 
 use color_eyre::eyre::Result;
+use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
 use tracing_error::ErrorLayer;
-use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter, Layer};
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
 
 pub fn initialise_tracing() -> Result<()> {
     let log_dir = dirs_next::data_dir()
@@ -17,17 +18,20 @@ pub fn initialise_tracing() -> Result<()> {
     // Try and read RUST_LOG for log level filter or default to info
     let env_filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info"));
 
-    let file_subscriber = tracing_subscriber::fmt::layer()
+    let formatting_layer = BunyanFormattingLayer::new("socal".into(), log_file);
+
+    let tracing_subscriber = tracing_subscriber::fmt::layer()
         .with_file(true)
         .with_line_number(true)
-        .with_writer(log_file)
         .with_target(false)
-        .with_ansi(false)
-        .with_filter(env_filter);
+        .with_ansi(false);
 
     tracing_subscriber::registry()
-        .with(file_subscriber)
+        .with(env_filter)
+        .with(tracing_subscriber)
         .with(ErrorLayer::default())
+        .with(JsonStorageLayer)
+        .with(formatting_layer)
         .init();
 
     Ok(())
