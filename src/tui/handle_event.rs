@@ -45,6 +45,7 @@ pub fn handle_event(
     })
 }
 
+#[tracing::instrument(name = "handle_key_event")]
 pub fn handle_key(key: event::KeyEvent) -> Option<Message> {
     match key.code {
         KeyCode::Char('q') => Some(Message::Quit),
