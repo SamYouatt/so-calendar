@@ -14,7 +14,6 @@ use oauth2::{
 };
 use url::Url;
 
-
 use crate::configuration::Application;
 
 use super::{

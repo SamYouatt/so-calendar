@@ -2,7 +2,6 @@ use color_eyre::eyre::Result;
 use eyre::Context;
 use sqlx::{query_as, SqlitePool};
 
-
 use super::Account;
 
 pub async fn retrieve_accounts(db: &SqlitePool) -> Result<Vec<Account>> {

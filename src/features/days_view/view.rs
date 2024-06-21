@@ -1,6 +1,6 @@
 use ratatui::prelude::*;
-use ratatui::widgets::*;
 use ratatui::style::palette::tailwind;
+use ratatui::widgets::*;
 
 // 10:00 <-- slightly greyed out colour
 //
@@ -27,7 +27,6 @@ fn render_times(frame: &mut Frame, area: Rect) {
     }
 }
 
-
 // xxxxxxxxxxxxxxxxxxxx  <- aiming for 20 characters wide
 //
 //       6 Jun (Red)
@@ -41,15 +40,17 @@ fn render_times(frame: &mut Frame, area: Rect) {
 //       ---- Other..     <-- but this one starts later
 // 14:00 ---- .......
 fn render_day(frame: &mut Frame, area: Rect) {
-
     let date = Line::styled("6 Jun", (tailwind::RED.c400, Modifier::BOLD));
     frame.render_widget(date, area);
-
 }
 
 pub fn render(frame: &mut Frame) {
-    let main_layout =
-        Layout::horizontal([Constraint::Length(6), Constraint::Length(20), Constraint::Min(20)]).split(frame.size());
+    let main_layout = Layout::horizontal([
+        Constraint::Length(6),
+        Constraint::Length(20),
+        Constraint::Min(20),
+    ])
+    .split(frame.size());
 
     let calendar_block = Block::default();
     let _month_view_placeholder = Paragraph::new("Days view").centered().block(calendar_block);

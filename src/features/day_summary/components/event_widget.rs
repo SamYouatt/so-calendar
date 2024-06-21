@@ -1,6 +1,6 @@
+use ratatui::prelude::*;
 use ratatui::style::palette::tailwind;
 use ratatui::widgets::Widget;
-use ratatui::prelude::*;
 use ratatui::widgets::*;
 
 use crate::domain::events::Event;
@@ -45,7 +45,6 @@ impl Widget for EventWidget<'_> {
             .render(event_content_layout[0], buf);
 
         if let Some(description) = &self.event.description {
-
             Paragraph::new(truncate_text(description, max_width))
                 .style(Style::new().fg(tailwind::STONE.c500))
                 .render(event_content_layout[1], buf);

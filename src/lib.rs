@@ -3,9 +3,9 @@ use configuration::Application;
 
 mod args;
 pub mod configuration;
+pub mod domain;
 pub mod features;
 pub mod tui;
-pub mod domain;
 pub mod util;
 
 pub async fn run(application: Application) -> Result<()> {

@@ -1,9 +1,8 @@
-use eyre::eyre;
 use color_eyre::eyre::Result;
+use eyre::eyre;
 use futures::future::join_all;
 use serde::Deserialize;
 use sqlx::SqlitePool;
-
 
 use crate::configuration::Application;
 
@@ -57,12 +56,18 @@ pub async fn populate_new_calendars(account_id: i64, application: &Application) 
         .map(|cal| Calendar::from(cal))
         .collect();
 
-    let _ = store_calendars(calendars, account_id, application).await.unwrap();
+    let _ = store_calendars(calendars, account_id, application)
+        .await
+        .unwrap();
 
     Ok(())
 }
 
-async fn store_calendars(calendars: Vec<Calendar>, account_id: i64, application: &Application) -> Result<()> {
+async fn store_calendars(
+    calendars: Vec<Calendar>,
+    account_id: i64,
+    application: &Application,
+) -> Result<()> {
     let store_row_queries: Vec<_> = calendars
         .into_iter()
         .map(|calendar| store_row(calendar, account_id, &application.db))
@@ -72,7 +77,10 @@ async fn store_calendars(calendars: Vec<Calendar>, account_id: i64, application:
 
     if results.iter().any(|res| res.is_err()) {
         let error_results = results.iter().filter(|res| res.is_err());
-        return Err(eyre!("Error while upserting new calendars: {:?}", error_results));
+        return Err(eyre!(
+            "Error while upserting new calendars: {:?}",
+            error_results
+        ));
     }
 
     Ok(())
@@ -95,6 +103,6 @@ async fn store_row(calendar: Calendar, account_id: i64, db: &SqlitePool) -> Resu
     )
     .execute(db)
     .await?;
-    
+
     Ok(())
 }

@@ -4,5 +4,5 @@ pub fn truncate_text(text: &str, length: usize) -> String {
         return text.to_string();
     }
 
-    format!("{}…", &text[..length-1].trim())
+    format!("{}…", &text[..length - 1].trim())
 }

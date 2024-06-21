@@ -1,10 +1,9 @@
 use chrono::{DateTime, Duration, Utc};
 use eyre::Context;
-use oauth2::{basic::BasicClient, reqwest::{async_http_client}, RefreshToken, TokenResponse};
+use oauth2::{basic::BasicClient, reqwest::async_http_client, RefreshToken, TokenResponse};
 use reqwest::RequestBuilder;
 use sqlx::{query, SqlitePool};
 use thiserror::Error;
-
 
 #[derive(Debug, Clone)]
 pub struct GoogleOAuthClient {
@@ -86,7 +85,8 @@ impl GoogleOAuthClient {
                     .expires_in()
                     .unwrap_or(std::time::Duration::from_secs(3600));
 
-            upsert_access_token_details(&self.db, &new_access_token, new_expiry, account_id).await?;
+            upsert_access_token_details(&self.db, &new_access_token, new_expiry, account_id)
+                .await?;
 
             new_access_token
         } else {

@@ -15,7 +15,8 @@ use tokio_util::sync::CancellationToken;
 
 use crate::{
     configuration::Application,
-    domain::events::{DayEvent, Event}, features::fetch_events::fetch_events::run_fetch_events_task,
+    domain::events::{DayEvent, Event},
+    features::fetch_events::fetch_events::run_fetch_events_task,
 };
 
 use self::model::{CurrentState, Message, Model};

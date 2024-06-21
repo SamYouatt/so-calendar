@@ -15,8 +15,7 @@ pub fn initialise_tracing() -> Result<()> {
     let log_file = fs::File::create(log_file_path)?;
 
     // Try and read RUST_LOG for log level filter or default to info
-    let env_filter =
-        EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info"));
+    let env_filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info"));
 
     let file_subscriber = tracing_subscriber::fmt::layer()
         .with_file(true)

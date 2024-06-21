@@ -2,10 +2,12 @@ use chrono::{Duration, Local, NaiveTime};
 use color_eyre::eyre::Result;
 
 use crate::{
-    domain::events::{DayEvent, Event}, features::{
+    domain::events::{DayEvent, Event},
+    features::{
         days_view::{days_view_state::DaysViewState, retrieve_calendars::retrieve_calendars},
         oauth_http_client::GoogleOAuthClient,
-    }, tui::model::{CurrentState, Model}
+    },
+    tui::model::{CurrentState, Model},
 };
 
 use super::{
