@@ -1,10 +1,12 @@
 use tokio_util::sync::CancellationToken;
 
 use crate::{
-    configuration::Application, domain::events::{DayEvent, Event}, features::{
+    configuration::Application,
+    domain::events::{DayEvent, Event},
+    features::{
         days_view::days_view_state::DaysViewState,
         manage_connections::manage_connections_state::ManageConnectionsState,
-    }
+    },
 };
 
 use super::MessageSender;

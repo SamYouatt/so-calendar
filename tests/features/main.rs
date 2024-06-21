@@ -1,7 +1,9 @@
 use oauth2::{basic::BasicClient, AuthUrl, ClientId, ClientSecret, RedirectUrl, TokenUrl};
 use std::{fs::create_dir_all, path::PathBuf};
 
-use socal::{configuration::Application, features::oauth_http_client::GoogleOAuthClient, tui::model::Model};
+use socal::{
+    configuration::Application, features::oauth_http_client::GoogleOAuthClient, tui::model::Model,
+};
 use sqlx::{sqlite::SqliteConnectOptions, SqlitePool};
 use tokio::sync::mpsc;
 use uuid::Uuid;

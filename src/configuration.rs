@@ -29,7 +29,7 @@ impl Application {
         let oauth_client = configure_oauth_client()?;
         let db = setup_database(&db_path).await?;
 
-        let google_client = GoogleOAuthClient::new(db.clone() ,oauth_client.clone());
+        let google_client = GoogleOAuthClient::new(db.clone(), oauth_client.clone());
 
         Ok(Self {
             data_dir,
@@ -52,12 +52,8 @@ fn configure_oauth_client() -> Result<BasicClient> {
     let client_secret = dotenv!("GOOGLE_CLIENT_SECRET", "Missing Google OAuth Client Secret");
 
     Ok(BasicClient::new(
-        ClientId::new(
-            client_id.into(),
-        ),
-        Some(ClientSecret::new(
-            client_secret.into(),
-        )),
+        ClientId::new(client_id.into()),
+        Some(ClientSecret::new(client_secret.into())),
         auth_url,
         Some(token_url),
     )
@@ -76,9 +72,7 @@ async fn setup_database(db_path: &PathBuf) -> Result<SqlitePool> {
         .await
         .wrap_err("Failed to connect to sqlite database")?;
 
-    sqlx::migrate!("./migrations")
-        .run(&db)
-        .await?;
+    sqlx::migrate!("./migrations").run(&db).await?;
 
     Ok(db)
 }

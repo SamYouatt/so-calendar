@@ -22,9 +22,7 @@ async fn can_navigate_account_list() {
     seed_account("test@test.com".into(), &model.application.db).await;
     seed_account("dave@dave.com".into(), &model.application.db).await;
 
-    let _ = update(&mut model, Message::ManageAccounts)
-        .await
-        .unwrap();
+    let _ = update(&mut model, Message::ManageAccounts).await.unwrap();
 
     // Act/Assert
     assert_selected_index(0, &model);
@@ -50,7 +48,7 @@ async fn seed_account(email: String, db: &SqlitePool) -> i64 {
     let row = sqlx::query!("INSERT INTO accounts (email, access_token, refresh_token, expires_at) VALUES ($1, $2, $3, $4) RETURNING id",
         email,
         access_token,
-        refresh_token, 
+        refresh_token,
         expires_at
     )
         .fetch_one(db)

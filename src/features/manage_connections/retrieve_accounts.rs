@@ -1,7 +1,6 @@
 use color_eyre::eyre::Result;
 use eyre::Context;
 use sqlx::{query_as, SqlitePool};
-use std::fmt::Display;
 
 use super::Account;
 
