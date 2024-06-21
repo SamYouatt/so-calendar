@@ -1,6 +1,6 @@
 use std::io::stdout;
 
-use chrono::{DateTime, Duration, Local, NaiveDate, NaiveTime, Utc};
+use chrono::{DateTime, Duration, Local, NaiveTime, Utc};
 use color_eyre::eyre::Result;
 use crossterm::{
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
@@ -76,7 +76,7 @@ pub async fn run_tui(application: Application) -> Result<()> {
         .unwrap()
         .with_timezone(&Utc);
 
-    let events = vec![Event {
+    let _events = vec![Event {
         id: "blah".to_string(),
         title: "Lunch".to_string(),
         description: None,
@@ -90,7 +90,7 @@ pub async fn run_tui(application: Application) -> Result<()> {
         start_time: meeting_start_time,
         end_time: meeting_end_time,
     }];
-    let day_events = vec![DayEvent {
+    let _day_events = vec![DayEvent {
         id: "scwhag".to_string(),
         title: "Birthday".to_string(),
         description: Some("Wish happy birthday".to_string()),

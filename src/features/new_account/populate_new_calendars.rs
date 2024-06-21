@@ -3,7 +3,7 @@ use color_eyre::eyre::Result;
 use futures::future::join_all;
 use serde::Deserialize;
 use sqlx::SqlitePool;
-use uuid::Uuid;
+
 
 use crate::configuration::Application;
 

@@ -1,10 +1,10 @@
 use chrono::{DateTime, Duration, Utc};
 use eyre::Context;
-use oauth2::{basic::BasicClient, reqwest::{async_http_client, http_client}, RefreshToken, TokenResponse};
+use oauth2::{basic::BasicClient, reqwest::{async_http_client}, RefreshToken, TokenResponse};
 use reqwest::RequestBuilder;
 use sqlx::{query, SqlitePool};
 use thiserror::Error;
-use uuid::Uuid;
+
 
 #[derive(Debug, Clone)]
 pub struct GoogleOAuthClient {

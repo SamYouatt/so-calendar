@@ -52,7 +52,7 @@ pub fn render(frame: &mut Frame) {
         Layout::horizontal([Constraint::Length(6), Constraint::Length(20), Constraint::Min(20)]).split(frame.size());
 
     let calendar_block = Block::default();
-    let month_view_placeholder = Paragraph::new("Days view").centered().block(calendar_block);
+    let _month_view_placeholder = Paragraph::new("Days view").centered().block(calendar_block);
 
     let today_block = Block::default().borders(Borders::LEFT);
     let today_view_placeholder = Paragraph::new("Today overview")

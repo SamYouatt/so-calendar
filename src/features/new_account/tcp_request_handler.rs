@@ -13,7 +13,7 @@ use oauth2::{
     TokenResponse,
 };
 use url::Url;
-use uuid::Uuid;
+
 
 use crate::configuration::Application;
 
